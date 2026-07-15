@@ -1,0 +1,20 @@
+run_id: run_014
+experiment_name: exp_001_cifar10_subset_study
+seed: 0
+description: Severe instability, smaller batch still
+dataset:
+  train_size: 5000
+  val_size: 1000
+  augmentation: true
+model:
+  dropout: 0.3
+training:
+  optimizer: adam
+  lr: 0.05
+  lr_scheduler: none
+  batch_size: 4
+  weight_decay: 0.0001
+  epochs: 20
+  gradient_clip_norm: null
+  early_stop_on_divergence: true
+  divergence_loss_threshold: 100.0

@@ -1,0 +1,20 @@
+run_id: run_005
+experiment_name: exp_001_cifar10_subset_study
+seed: 0
+description: 'Severe overfitting: small subset, no regularization, no augmentation'
+dataset:
+  train_size: 1500
+  val_size: 1000
+  augmentation: false
+model:
+  dropout: 0.0
+training:
+  optimizer: adam
+  lr: 0.001
+  lr_scheduler: cosine
+  batch_size: 64
+  weight_decay: 0.0
+  epochs: 20
+  gradient_clip_norm: null
+  early_stop_on_divergence: true
+  divergence_loss_threshold: 100.0
