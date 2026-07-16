@@ -20,7 +20,8 @@ from __future__ import annotations
 from typing import Any
 
 from app.agent.graph import MAX_RETRIES
-from app.agent.state import AgentState, Recommendation, TraceEntry
+from app.agent.state import AgentState, TraceEntry
+from app.llm import Recommendation
 
 
 def _known_evidence_tokens(state: AgentState) -> set[str]:

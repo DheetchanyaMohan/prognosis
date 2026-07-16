@@ -42,6 +42,12 @@ class Settings(BaseSettings):
 
     # External services (used by later phases, not the current scaffold)
     anthropic_api_key: str | None = None
+    anthropic_model: str = "claude-sonnet-4-5"
+
+    # LLM service layer (app.llm) — provider-independent configuration
+    llm_provider: str = "anthropic"
+    llm_max_retries: int = 3
+    llm_retry_backoff_seconds: float = 1.0
 
     # Logging
     log_level: str = "INFO"
