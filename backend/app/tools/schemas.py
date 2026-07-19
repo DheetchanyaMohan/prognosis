@@ -209,3 +209,23 @@ class RunComparisonResult(BaseModel):
     run_a_diagnostics: RunDiagnostics
     run_b_diagnostics: RunDiagnostics
     config_differences: list[ConfigDiffEntry]
+
+
+class RunArtifactPaths(BaseModel):
+    """File-path lookup for a single run's artifacts on disk.
+
+    Deliberately separate from RunRecord (which excludes file paths on
+    purpose — see its docstring). Callers that genuinely need to read a
+    run's config.yaml/summary.json/diagnostics.json themselves (e.g. the
+    API layer's run-detail endpoint) get paths through this model rather
+    than reaching into the ORM Run row directly.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: str
+    config_path: str
+    metrics_path: str
+    log_path: str
+    summary_path: str
+    diagnostics_path: str

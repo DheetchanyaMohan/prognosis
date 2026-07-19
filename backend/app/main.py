@@ -1,8 +1,7 @@
 """FastAPI application entrypoint.
 
-This module only assembles the app: settings, logging, middleware, and a
-health check. Feature routers (experiments, runs, agent, eval) are added
-in a later phase under app/api/routes and included here.
+This module only assembles the app: settings, logging, middleware, and
+router registration. Route logic itself lives under app/api/routes.
 """
 
 from collections.abc import AsyncIterator
@@ -11,6 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes import experiments, health
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 
@@ -39,10 +39,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.get("/health", tags=["system"])
-    async def health_check() -> dict[str, str]:
-        """Liveness check. Does not touch the database or any external service."""
-        return {"status": "ok", "environment": settings.environment}
+    # Health check is unprefixed (conventional for load balancer / k8s probes);
+    # resource routes live under the versioned API prefix.
+    app.include_router(health.router)
+    app.include_router(experiments.router, prefix=settings.api_v1_prefix)
 
     return app
 
