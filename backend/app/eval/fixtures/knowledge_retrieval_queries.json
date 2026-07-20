@@ -1,0 +1,22 @@
+[
+  {"query": "What is overfitting in machine learning?", "relevant_sources": ["overfitting"]},
+  {"query": "How can I tell my model is overfitting from train and validation loss?", "relevant_sources": ["overfitting"]},
+  {"query": "What is the difference between overfitting and underfitting?", "relevant_sources": ["overfitting", "underfitting"]},
+  {"query": "Why is my model's training accuracy low?", "relevant_sources": ["underfitting"]},
+  {"query": "How do I fix a model that is underfitting?", "relevant_sources": ["underfitting"]},
+  {"query": "What is a learning rate schedule?", "relevant_sources": ["learning_rate_scheduling"]},
+  {"query": "Should I use cosine annealing or step decay for the learning rate?", "relevant_sources": ["learning_rate_scheduling"]},
+  {"query": "What happens if my learning rate is too high?", "relevant_sources": ["learning_rate_scheduling", "optimization"]},
+  {"query": "What is dropout regularization?", "relevant_sources": ["regularization"]},
+  {"query": "How does weight decay prevent overfitting?", "relevant_sources": ["regularization", "overfitting"]},
+  {"query": "What regularization techniques exist for neural networks?", "relevant_sources": ["regularization"]},
+  {"query": "What is the Adam optimizer?", "relevant_sources": ["optimization"]},
+  {"query": "Why does my training loss oscillate or spike?", "relevant_sources": ["optimization"]},
+  {"query": "What is gradient clipping used for?", "relevant_sources": ["optimization"]},
+  {"query": "What is data augmentation and why is it useful?", "relevant_sources": ["data_augmentation"]},
+  {"query": "What are common image augmentation techniques?", "relevant_sources": ["data_augmentation"]},
+  {"query": "How much training data do I need for a CNN?", "relevant_sources": ["data_augmentation", "ml_best_practices"]},
+  {"query": "What are best practices for setting up ML experiments?", "relevant_sources": ["ml_best_practices"]},
+  {"query": "How should I choose a batch size?", "relevant_sources": ["ml_best_practices", "optimization"]},
+  {"query": "What is early stopping?", "relevant_sources": ["ml_best_practices", "overfitting"]}
+]
