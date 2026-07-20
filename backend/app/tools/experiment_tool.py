@@ -12,13 +12,15 @@ from sqlalchemy.orm import Session
 
 from app.models import Experiment, Run
 from app.tools._db import ExperimentNotFoundError, RunNotFoundError, get_run_or_raise, session_scope
-from app.tools.schemas import ExperimentRecord, RunRecord, RunSearchFilters
+from app.tools.schemas import ExperimentRecord, RunArtifactPaths, RunRecord, RunSearchFilters
 
 __all__ = [
     "get_run",
     "search_runs",
     "load_experiment",
+    "list_experiments",
     "list_recent_runs",
+    "get_run_artifact_paths",
     "RunNotFoundError",
     "ExperimentNotFoundError",
 ]
@@ -84,3 +86,35 @@ def list_recent_runs(limit: int = 10, db: Session | None = None) -> list[RunReco
     with session_scope(db) as session:
         runs = session.query(Run).order_by(Run.created_at.desc()).limit(limit).all()
         return [_to_run_record(r) for r in runs]
+
+
+def list_experiments(db: Session | None = None) -> list[ExperimentRecord]:
+    """Returns every experiment, ordered by creation time."""
+    with session_scope(db) as session:
+        experiments = session.query(Experiment).order_by(Experiment.created_at).all()
+        return [
+            ExperimentRecord(
+                experiment_name=e.name,
+                description=e.description,
+                created_at=e.created_at,
+                run_ids=[r.run_name for r in e.runs],
+            )
+            for e in experiments
+        ]
+
+
+def get_run_artifact_paths(run_id: str, db: Session | None = None) -> RunArtifactPaths:
+    """Looks up where a run's artifact files live on disk.
+
+    Raises RunNotFoundError if no such run exists.
+    """
+    with session_scope(db) as session:
+        run = get_run_or_raise(session, run_id)
+        return RunArtifactPaths(
+            run_id=run_id,
+            config_path=run.config_path,
+            metrics_path=run.metrics_path,
+            log_path=run.log_path,
+            summary_path=run.summary_path,
+            diagnostics_path=run.diagnostics_path,
+        )
