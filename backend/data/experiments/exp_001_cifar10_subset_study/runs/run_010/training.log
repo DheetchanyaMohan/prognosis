@@ -1,0 +1,4 @@
+2026-07-22 09:42:24 | INFO    | Starting run run_010: Severe LR-too-high, likely divergence
+2026-07-22 09:42:29 | INFO    | [epoch 1] train_loss=3135.7929 val_loss=2.3091 train_acc=0.0958 val_acc=0.0960 lr=0.100000
+2026-07-22 09:42:29 | WARNING | Stopping early: Loss 3135.7929 exceeded divergence threshold 100.0 at epoch 1
+2026-07-22 09:42:29 | INFO    | Finished run run_010: status=diverged, epochs_completed=1

@@ -1,0 +1,42 @@
+{
+  "run_id": "run_013",
+  "total_epochs": 20,
+  "generalization_gap": {
+    "epoch": 20,
+    "train_loss": 2.309540371322632,
+    "val_loss": 2.3083044052124024,
+    "loss_gap": -0.0012359661102294695,
+    "loss_gap_pct": -0.05351567461544974,
+    "train_acc": 0.0966,
+    "val_acc": 0.102,
+    "accuracy_gap": -0.005399999999999988,
+    "trend": "narrowing"
+  },
+  "plateau": {
+    "metric": "val_loss",
+    "window": 5,
+    "threshold": 0.02,
+    "plateaued": true,
+    "plateau_start_epoch": 1,
+    "observed_range": 0.006793134689331293,
+    "insufficient_data": false
+  },
+  "instability": {
+    "metric": "train_loss",
+    "spike_relative_threshold": 0.5,
+    "coefficient_of_variation_threshold": 0.3,
+    "is_unstable": true,
+    "spike_epochs": [
+      11,
+      15
+    ],
+    "coefficient_of_variation": 0.6779519979634845
+  },
+  "best_epoch": {
+    "epoch": 9,
+    "val_loss": 2.302666391372681,
+    "train_loss": 2.3108239513397217,
+    "val_acc": 0.102,
+    "train_acc": 0.1002
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "run_id": "run_004",
+  "total_epochs_completed": 20,
+  "best_epoch": 18,
+  "best_val_loss": 1.2433158130645752,
+  "final_train_loss": 1.0425988502502441,
+  "final_val_loss": 1.2439485187530517,
+  "final_train_acc": 0.618,
+  "final_val_acc": 0.534,
+  "wall_clock_sec": 72.02744629999506,
+  "diverged": false,
+  "description": "Run run_004 completed its full epoch budget, finishing after 20 epoch(s). Best validation loss was 1.2433 at epoch 18. Final train/val loss: 1.0426/1.2439, final train/val accuracy: 0.6180/0.5340."
+}

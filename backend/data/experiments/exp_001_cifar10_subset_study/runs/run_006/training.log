@@ -1,0 +1,22 @@
+2026-07-22 09:29:04 | INFO    | Starting run run_006: Severe overfitting, alternate seed
+2026-07-22 09:29:14 | INFO    | [epoch 1] train_loss=2.1917 val_loss=1.9891 train_acc=0.2000 val_acc=0.2500 lr=0.000994
+2026-07-22 09:29:18 | INFO    | [epoch 2] train_loss=1.9533 val_loss=1.9051 train_acc=0.3133 val_acc=0.2980 lr=0.000976
+2026-07-22 09:29:22 | INFO    | [epoch 3] train_loss=1.7722 val_loss=1.7439 train_acc=0.3520 val_acc=0.3610 lr=0.000946
+2026-07-22 09:29:26 | INFO    | [epoch 4] train_loss=1.5840 val_loss=1.6722 train_acc=0.4220 val_acc=0.3780 lr=0.000905
+2026-07-22 09:29:29 | INFO    | [epoch 5] train_loss=1.4183 val_loss=1.6567 train_acc=0.4840 val_acc=0.4020 lr=0.000854
+2026-07-22 09:29:33 | INFO    | [epoch 6] train_loss=1.3252 val_loss=1.5846 train_acc=0.5053 val_acc=0.4390 lr=0.000794
+2026-07-22 09:29:37 | INFO    | [epoch 7] train_loss=1.1843 val_loss=1.5749 train_acc=0.5720 val_acc=0.4400 lr=0.000727
+2026-07-22 09:29:41 | INFO    | [epoch 8] train_loss=1.0747 val_loss=1.6281 train_acc=0.6033 val_acc=0.4390 lr=0.000655
+2026-07-22 09:29:45 | INFO    | [epoch 9] train_loss=0.9678 val_loss=1.5943 train_acc=0.6567 val_acc=0.4670 lr=0.000578
+2026-07-22 09:29:48 | INFO    | [epoch 10] train_loss=0.8724 val_loss=1.6035 train_acc=0.6873 val_acc=0.4650 lr=0.000500
+2026-07-22 09:29:52 | INFO    | [epoch 11] train_loss=0.7839 val_loss=1.6411 train_acc=0.7207 val_acc=0.4530 lr=0.000422
+2026-07-22 09:29:56 | INFO    | [epoch 12] train_loss=0.6655 val_loss=1.6983 train_acc=0.7753 val_acc=0.4620 lr=0.000345
+2026-07-22 09:30:00 | INFO    | [epoch 13] train_loss=0.5753 val_loss=1.7374 train_acc=0.8173 val_acc=0.4650 lr=0.000273
+2026-07-22 09:30:04 | INFO    | [epoch 14] train_loss=0.4914 val_loss=1.7777 train_acc=0.8520 val_acc=0.4710 lr=0.000206
+2026-07-22 09:30:08 | INFO    | [epoch 15] train_loss=0.4342 val_loss=1.8147 train_acc=0.8700 val_acc=0.4660 lr=0.000146
+2026-07-22 09:30:12 | INFO    | [epoch 16] train_loss=0.4039 val_loss=1.8405 train_acc=0.8900 val_acc=0.4640 lr=0.000095
+2026-07-22 09:30:16 | INFO    | [epoch 17] train_loss=0.3624 val_loss=1.8505 train_acc=0.9060 val_acc=0.4700 lr=0.000054
+2026-07-22 09:30:20 | INFO    | [epoch 18] train_loss=0.3394 val_loss=1.8570 train_acc=0.9213 val_acc=0.4750 lr=0.000024
+2026-07-22 09:30:24 | INFO    | [epoch 19] train_loss=0.3268 val_loss=1.8597 train_acc=0.9247 val_acc=0.4780 lr=0.000006
+2026-07-22 09:30:28 | INFO    | [epoch 20] train_loss=0.3205 val_loss=1.8622 train_acc=0.9300 val_acc=0.4760 lr=0.000000
+2026-07-22 09:30:29 | INFO    | Finished run run_006: status=complete, epochs_completed=20
