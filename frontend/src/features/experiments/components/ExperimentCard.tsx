@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { Card } from "@/components/ui"
+import { cn, focusRingClass } from "@/lib/utils"
 import { formatBackendDate } from "@/lib/format-date"
 import type { ExperimentRecord } from "../types"
 
@@ -17,7 +18,7 @@ export function ExperimentCard({ experiment }: ExperimentCardProps) {
   return (
     <Link
       to={`/experiments/${encodeURIComponent(experiment.experiment_name)}`}
-      className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+      className={cn("block rounded-lg", focusRingClass)}
     >
       <Card className="p-4 transition-colors hover:border-foreground/20 sm:p-5">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">

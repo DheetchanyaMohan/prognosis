@@ -1,6 +1,6 @@
 import { PendingCard, Badge, StatCard } from "@/components/ui"
 import { AlertTriangle } from "lucide-react"
-import { formatWallClock } from "../utils/format-run-stats"
+import { formatWallClock, formatLoss, formatPercent } from "../utils/format-run-stats"
 import type { RunSummaryResponse } from "../types"
 
 interface SummaryPanelProps {
@@ -38,13 +38,13 @@ export function SummaryPanel({ summary, isPolling }: SummaryPanelProps) {
         )}
       </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Final train loss" value={summary.final_train_loss.toFixed(3)} />
-        <StatCard label="Final val loss" value={summary.final_val_loss.toFixed(3)} />
-        <StatCard label="Final train acc" value={`${(summary.final_train_acc * 100).toFixed(1)}%`} />
-        <StatCard label="Final val acc" value={`${(summary.final_val_acc * 100).toFixed(1)}%`} />
+        <StatCard label="Final train loss" value={formatLoss(summary.final_train_loss)} />
+        <StatCard label="Final val loss" value={formatLoss(summary.final_val_loss)} />
+        <StatCard label="Final train acc" value={`${formatPercent(summary.final_train_acc)}%`} />
+        <StatCard label="Final val acc" value={`${formatPercent(summary.final_val_acc)}%`} />
         <StatCard label="Wall-clock time" value={formatWallClock(summary.wall_clock_sec)} />
         <StatCard label="Epochs completed" value={summary.total_epochs_completed} />
-        <StatCard label="Best val loss" value={summary.best_val_loss.toFixed(3)} />
+        <StatCard label="Best val loss" value={formatLoss(summary.best_val_loss)} />
         <StatCard label="Best epoch" value={summary.best_epoch} />
       </div>
     </div>

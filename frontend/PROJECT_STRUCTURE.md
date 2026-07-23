@@ -116,9 +116,9 @@ app/
 └── pages/
     ├── ExperimentListPage.tsx           ✅  Fully wired: useExperimentsQuery, skeleton/
     │                                        empty/error states, renders ExperimentCard[].
-    ├── ExperimentDetailPage.tsx           🔲  Shell only. TODO comment specifies:
-    │                                          useExperimentQuery + <RunTable>, loading/
-    │                                          empty/error states per Architecture §7.
+    ├── ExperimentDetailPage.tsx           ✅  Fully wired: useExperimentQuery, skeleton/
+    │                                          404/network/generic error states, header
+    │                                          (name/description/created date), <RunTable>.
     ├── RunDetailPage.tsx                   ✅  Fully wired via useRunDetail: skeleton/
     │                                            404/network/generic error states, then
     │                                            RunHeaderBand → DiagnosisPanel →
@@ -171,11 +171,17 @@ experiments/
 │   │                                        "No description" placeholder, run count.
 │   ├── ExperimentCardSkeleton.tsx         ✅  Matches ExperimentCard's exact dimensions
 │   │                                          (Architecture §14: skeletons, not spinners).
-│   └── RunTable.tsx                        🔲  Shell only. Will render one row per
-│                                                run_id, each row self-fetching via
-│                                                useRunQuery (the N+1 pattern from
-│                                                Integration Guide §7/§9 — intentionally
-│                                                not "optimized away").
+│   ├── RunTable.tsx                        ✅  One RunRow per run_id; "No runs yet"
+│   │                                            EmptyState when the list is empty.
+│   └── RunRow.tsx                            ✅  Self-fetches via useRunQuery(runId) —
+│                                                  the N+1 pattern (Integration Guide
+│                                                  §7/§9), deliberately not batched.
+│                                                  ID renders immediately; StatusBadge +
+│                                                  best val loss shimmer in independently
+│                                                  while that row's own request resolves.
+│                                                  Imports useRunQuery/deriveRunStatus/
+│                                                  StatusBadge from @/features/runs (the
+│                                                  barrel) per ADR-002.
 ├── hooks/                            ⬜  Reserved — nothing feature-local needed yet.
 ├── types/index.ts                      ✅  ExperimentRecord — exact mirror of the model.
 └── utils/                              ⬜  Reserved — no derived logic needed yet.
@@ -186,9 +192,10 @@ experiments/
 ```
 runs/
 ├── index.ts                          ✅  Barrel — types + queries + hooks/useRunDetail +
-│                                          utils/deriveRunStatus. Documents the
-│                                          barrel-only cross-feature import rule
-│                                          (ADR-002) inline.
+│                                          utils/deriveRunStatus + components/StatusBadge
+│                                          (added this slice — RunRow needed it).
+│                                          Documents the barrel-only cross-feature
+│                                          import rule (ADR-002) inline.
 ├── api/queries.ts                      ✅  getRun(id), useRunQuery(id) — staleTime 0,
 │                                            refetchInterval enabled ONLY while
 │                                            summary/diagnostics are null, disabled
@@ -322,9 +329,9 @@ backend doesn't support them yet, not because they were forgotten:
 
 ---
 
-## What "Continue" would build next
+## What's left
 
-1. `ExperimentDetailPage` — wire `useExperimentQuery` + a real `RunTable`/`RunRow`
-   (the self-fetching N+1 pattern), with loading/empty/error states.
-2. Consider extracting a `useExperimentDetail` view-model hook if that page's
-   logic grows past thin composition, mirroring `useRunDetail`.
+Every route now has a fully implemented page. Remaining documented gaps are
+all Future Enhancements blocked on backend capability (Architecture §24/§25):
+run comparison, agent interaction, learning-curve charts, search/pagination,
+multi-user auth — none of which exist in the API yet.

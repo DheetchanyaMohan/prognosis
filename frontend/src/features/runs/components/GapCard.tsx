@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardContent, Badge } from "@/components/ui"
+import { formatLoss, formatPercent } from "../utils/format-run-stats"
 import type { GeneralizationGap } from "../types"
 
 interface GapCardProps {
@@ -42,11 +43,11 @@ export function GapCard({ gap, totalEpochs }: GapCardProps) {
         <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
           <dt className="text-muted-foreground">Loss gap</dt>
           <dd className="text-right font-mono tabular-nums text-foreground">
-            {gap.loss_gap.toFixed(3)} ({formatLossGapPct(gap.loss_gap_pct)})
+            {formatLoss(gap.loss_gap)} ({formatLossGapPct(gap.loss_gap_pct)})
           </dd>
           <dt className="text-muted-foreground">Accuracy gap</dt>
           <dd className="text-right font-mono tabular-nums text-foreground">
-            {(gap.accuracy_gap * 100).toFixed(1)} pts
+            {formatPercent(gap.accuracy_gap)} pts
           </dd>
         </dl>
       </CardContent>

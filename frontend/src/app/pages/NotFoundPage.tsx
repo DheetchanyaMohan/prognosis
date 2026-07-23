@@ -1,15 +1,13 @@
 import { Link } from "react-router-dom"
 import { ErrorState } from "@/components/ui"
+import { buttonClasses } from "@/lib/utils"
 
 export function NotFoundPage() {
   return (
     <ErrorState
       variant="not-found"
       action={
-        <Link
-          to="/experiments"
-          className="rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-secondary"
-        >
+        <Link to="/experiments" className={buttonClasses("outline")}>
           Back to experiments
         </Link>
       }

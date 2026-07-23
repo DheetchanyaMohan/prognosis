@@ -32,7 +32,8 @@ RUN_SUMMARY_COLLECTION_NAME = "run_summaries"
 _COLLECTION_METADATA = {"hnsw:space": "cosine"}
 
 
-def get_chroma_client(persist_dir: Path = CHROMA_PERSIST_DIR) -> ClientAPI:
+def get_chroma_client(persist_dir: Path | None = None) -> ClientAPI:
+    persist_dir = persist_dir if persist_dir is not None else CHROMA_PERSIST_DIR
     persist_dir.mkdir(parents=True, exist_ok=True)
     return chromadb.PersistentClient(path=str(persist_dir))
 

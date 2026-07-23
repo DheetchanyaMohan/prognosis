@@ -4,8 +4,7 @@ import { RunHeaderBand } from "@/features/runs/components/RunHeaderBand"
 import { DiagnosisPanel } from "@/features/runs/components/DiagnosisPanel"
 import { SummaryPanel } from "@/features/runs/components/SummaryPanel"
 import { ConfigPanel } from "@/features/runs/components/ConfigPanel"
-import { ErrorState, Button, Skeleton } from "@/components/ui"
-import { NetworkError, NotFoundError } from "@/lib/api/errors"
+import { QueryErrorState, Skeleton } from "@/components/ui"
 
 function RunDetailSkeleton() {
   return (
@@ -39,19 +38,7 @@ export function RunDetailPage() {
   }
 
   if (isError) {
-    if (error instanceof NotFoundError) {
-      return <ErrorState variant="not-found" title="This run doesn't exist" />
-    }
-    return (
-      <ErrorState
-        variant={error instanceof NetworkError ? "network" : "generic"}
-        action={
-          <Button variant="outline" onClick={refetch}>
-            Try again
-          </Button>
-        }
-      />
-    )
+    return <QueryErrorState error={error} onRetry={refetch} notFoundTitle="This run doesn't exist" />
   }
 
   if (!run) {

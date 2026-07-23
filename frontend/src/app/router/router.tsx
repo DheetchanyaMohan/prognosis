@@ -10,8 +10,8 @@ import { NotFoundPage } from "../pages/NotFoundPage"
  *
  *   /                                          → redirect to /experiments   ✅
  *   /experiments                               → Experiment List            ✅
- *   /experiments/:experimentId                 → Experiment Detail          (scaffold only — see page)
- *   /experiments/:experimentId/runs/:runId     → Run Detail                  (scaffold only — see page)
+ *   /experiments/:experimentId                 → Experiment Detail          ✅
+ *   /experiments/:experimentId/runs/:runId     → Run Detail                  ✅
  *   *                                          → 404                        ✅
  */
 export const router = createBrowserRouter([

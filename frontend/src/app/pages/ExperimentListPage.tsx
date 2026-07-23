@@ -2,8 +2,7 @@ import { FolderOpen } from "lucide-react"
 import { useExperimentsQuery } from "@/features/experiments"
 import { ExperimentCard } from "@/features/experiments/components/ExperimentCard"
 import { ExperimentCardSkeleton } from "@/features/experiments/components/ExperimentCardSkeleton"
-import { EmptyState, ErrorState, Button } from "@/components/ui"
-import { NetworkError } from "@/lib/api/errors"
+import { EmptyState, QueryErrorState } from "@/components/ui"
 
 /**
  * `/experiments` — Architecture §7. Zero experiments gets a full-page
@@ -23,16 +22,7 @@ export function ExperimentListPage() {
   }
 
   if (isError) {
-    return (
-      <ErrorState
-        variant={error instanceof NetworkError ? "network" : "generic"}
-        action={
-          <Button variant="outline" onClick={() => refetch()}>
-            Try again
-          </Button>
-        }
-      />
-    )
+    return <QueryErrorState error={error} onRetry={() => refetch()} />
   }
 
   if (data.length === 0) {

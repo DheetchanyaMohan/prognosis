@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent, StatCard } from "@/components/ui"
+import { formatLoss, formatPercent } from "../utils/format-run-stats"
 import type { BestEpochDiagnostic } from "../types"
 
 interface BestEpochCardProps {
@@ -20,9 +21,9 @@ export function BestEpochCard({ bestEpoch }: BestEpochCardProps) {
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-3 p-0 pt-3">
         <StatCard label="Epoch" value={bestEpoch.epoch} />
-        <StatCard label="Val loss" value={bestEpoch.val_loss.toFixed(3)} />
-        <StatCard label="Val acc" value={`${(bestEpoch.val_acc * 100).toFixed(1)}%`} />
-        <StatCard label="Train acc" value={`${(bestEpoch.train_acc * 100).toFixed(1)}%`} />
+        <StatCard label="Val loss" value={formatLoss(bestEpoch.val_loss)} />
+        <StatCard label="Val acc" value={`${formatPercent(bestEpoch.val_acc)}%`} />
+        <StatCard label="Train acc" value={`${formatPercent(bestEpoch.train_acc)}%`} />
       </CardContent>
     </Card>
   )

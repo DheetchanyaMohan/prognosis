@@ -1,8 +1,9 @@
+import type { ReactNode } from "react"
 import { TrendingUp, PauseCircle, Zap, CheckCircle2, Clock } from "lucide-react"
 import { Badge, type BadgeTone } from "@/components/ui"
 import type { RunStatusFlag } from "../utils/deriveRunStatus"
 
-const flagConfig: Record<RunStatusFlag, { tone: BadgeTone; icon: React.ReactNode; label: string }> = {
+const flagConfig: Record<RunStatusFlag, { tone: BadgeTone; icon: ReactNode; label: string }> = {
   overfitting: { tone: "concern", icon: <TrendingUp className="size-3.5" aria-hidden="true" />, label: "Overfitting" },
   stalled: { tone: "caution", icon: <PauseCircle className="size-3.5" aria-hidden="true" />, label: "Stalled" },
   unstable: { tone: "concern", icon: <Zap className="size-3.5" aria-hidden="true" />, label: "Unstable" },
