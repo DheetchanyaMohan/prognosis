@@ -32,3 +32,6 @@ htmlcov/
 
 # OS
 .DS_Store
+
+backend/data/cifar10_cache/
+*.tar.gz
