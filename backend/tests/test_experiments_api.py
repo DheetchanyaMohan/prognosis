@@ -12,14 +12,14 @@ from app.data_generation.metrics_writer import EpochMetrics
 from app.data_generation.persistence import get_or_create_experiment, persist_run
 
 
-def _write_config(path: Path, run_id: str) -> None:
+def _write_config(path: Path, run_id: str, dropout: float = 0.3) -> None:
     config = RunConfig(
         run_id=run_id,
         experiment_name="exp_test",
         seed=0,
         description="test run",
         dataset=DatasetConfig(train_size=1000, val_size=500, augmentation=True),
-        model=ModelConfig(dropout=0.3),
+        model=ModelConfig(dropout=dropout),
         training=TrainingConfig(optimizer="adam", lr=0.001, batch_size=64, weight_decay=0.0001),
     )
     path.write_text(yaml.safe_dump(config.model_dump(), sort_keys=False))
@@ -73,6 +73,7 @@ def _seed_run(
     experiment_name: str = "exp_test",
     with_summary: bool = True,
     with_diagnostics: bool = True,
+    dropout: float = 0.3,
 ) -> None:
     experiment = get_or_create_experiment(db, name=experiment_name, description="a test experiment")
     db.commit()
@@ -80,7 +81,7 @@ def _seed_run(
     run_dir = tmp_path / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     config_path = run_dir / "config.yaml"
-    _write_config(config_path, run_id)
+    _write_config(config_path, run_id, dropout=dropout)
 
     summary_path = run_dir / "summary.json"
     if with_summary:
@@ -196,3 +197,69 @@ async def test_get_run_detail_partial_when_only_summary_exists(
     body = response.json()
     assert body["summary"] is not None
     assert body["diagnostics"] is None
+
+
+# --- GET /api/v1/runs/{run_a_id}/compare/{run_b_id} -----------------------
+
+
+async def test_compare_runs_returns_config_differences(
+    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+) -> None:
+    _seed_run(db_session, tmp_path, "run_101", dropout=0.0)
+    _seed_run(db_session, tmp_path, "run_102", dropout=0.5)
+
+    response = await api_client.get("/api/v1/runs/run_101/compare/run_102")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["run_a_id"] == "run_101"
+    assert body["run_b_id"] == "run_102"
+    diff_fields = {d["field"] for d in body["config_differences"]}
+    assert "dropout" in diff_fields
+
+
+async def test_compare_runs_includes_diagnostics_for_both_runs(
+    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+) -> None:
+    _seed_run(db_session, tmp_path, "run_101")
+    _seed_run(db_session, tmp_path, "run_102")
+
+    response = await api_client.get("/api/v1/runs/run_101/compare/run_102")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["run_a_diagnostics"]["run_id"] == "run_101"
+    assert body["run_b_diagnostics"]["run_id"] == "run_102"
+
+
+async def test_compare_runs_404_when_first_run_missing(
+    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+) -> None:
+    _seed_run(db_session, tmp_path, "run_102")
+
+    response = await api_client.get("/api/v1/runs/does_not_exist/compare/run_102")
+
+    assert response.status_code == 404
+    assert "does_not_exist" in response.json()["detail"]
+
+
+async def test_compare_runs_404_when_second_run_missing(
+    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+) -> None:
+    _seed_run(db_session, tmp_path, "run_101")
+
+    response = await api_client.get("/api/v1/runs/run_101/compare/does_not_exist")
+
+    assert response.status_code == 404
+    assert "does_not_exist" in response.json()["detail"]
+
+
+async def test_compare_runs_registered_in_openapi(api_client: httpx.AsyncClient) -> None:
+    response = await api_client.get("/openapi.json")
+    schema = response.json()
+
+    path_item = schema["paths"].get("/api/v1/runs/{run_a_id}/compare/{run_b_id}")
+    assert path_item is not None
+    assert "get" in path_item
+    response_schema = path_item["get"]["responses"]["200"]["content"]["application/json"]["schema"]
+    assert response_schema["$ref"].endswith("RunComparisonResult")

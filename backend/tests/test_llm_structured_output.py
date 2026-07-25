@@ -20,9 +20,16 @@ class _Item(BaseModel):
 class FakeChatModel:
     def __init__(self, response: str) -> None:
         self._response = response
+        self.last_response_schema: object = "not called yet"
 
-    def complete(self, system_prompt: str, user_prompt: str) -> str:
+    def complete(self, system_prompt: str, user_prompt: str, response_schema: object = None) -> str:
+        self.last_response_schema = response_schema
         return self._response
+
+    def complete_structured(
+        self, system_prompt: str, user_prompt: str, response_schema: object = None
+    ) -> object:
+        return json.loads(self.complete(system_prompt, user_prompt, response_schema))
 
     def stream_complete(self, system_prompt: str, user_prompt: str):
         yield self._response
@@ -44,7 +51,7 @@ def test_empty_array_returns_empty_list() -> None:
 
 
 def test_malformed_json_raises_structured_output_error() -> None:
-    with pytest.raises(StructuredOutputError, match="not valid JSON"):
+    with pytest.raises(StructuredOutputError, match="did not return usable structured output"):
         generate_structured_list(FakeChatModel("not json"), "sys", "user", _Item)
 
 
@@ -65,6 +72,17 @@ def test_structured_output_error_is_a_value_error() -> None:
     assert issubclass(StructuredOutputError, ValueError)
 
 
+def test_list_passes_list_of_item_model_as_response_schema() -> None:
+    """generate_structured_list must hand the target schema through to
+    complete() — this is what lets a provider with native structured
+    output (Gemini) constrain its own response, instead of the JSON
+    request living only in prompt text that a model can ignore."""
+    client = FakeChatModel(json.dumps([{"name": "a", "value": 1}]))
+    generate_structured_list(client, "sys", "user", _Item)
+
+    assert client.last_response_schema == list[_Item]
+
+
 # --- generate_structured_object ---------------------------------------
 
 
@@ -75,7 +93,7 @@ def test_parses_valid_json_object() -> None:
 
 
 def test_object_malformed_json_raises() -> None:
-    with pytest.raises(StructuredOutputError, match="not valid JSON"):
+    with pytest.raises(StructuredOutputError, match="did not return usable structured output"):
         generate_structured_object(FakeChatModel("not json"), "sys", "user", _Item)
 
 
@@ -83,3 +101,10 @@ def test_object_invalid_item_raises() -> None:
     response = json.dumps({"name": "a"})  # missing "value"
     with pytest.raises(StructuredOutputError):
         generate_structured_object(FakeChatModel(response), "sys", "user", _Item)
+
+
+def test_object_passes_response_model_as_response_schema() -> None:
+    client = FakeChatModel(json.dumps({"name": "a", "value": 1}))
+    generate_structured_object(client, "sys", "user", _Item)
+
+    assert client.last_response_schema is _Item

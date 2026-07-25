@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import experiments, health
+from app.api.routes import diagnosis, experiments, health
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 
@@ -43,8 +43,8 @@ def create_app() -> FastAPI:
     # resource routes live under the versioned API prefix.
     app.include_router(health.router)
     app.include_router(experiments.router, prefix=settings.api_v1_prefix)
+    app.include_router(diagnosis.router, prefix=settings.api_v1_prefix)
 
     return app
-
 
 app = create_app()

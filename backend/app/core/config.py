@@ -43,9 +43,13 @@ class Settings(BaseSettings):
     # External services (used by later phases, not the current scaffold)
     anthropic_api_key: str | None = None
     anthropic_model: str = "claude-sonnet-4-5"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
 
-    # LLM service layer (app.llm) — provider-independent configuration
-    llm_provider: str = "anthropic"
+    # LLM service layer (app.llm) — provider-independent configuration.
+    # "gemini" is the default per current project preference; set
+    # LLM_PROVIDER=anthropic to switch back, no code change needed.
+    llm_provider: str = "gemini"
     llm_max_retries: int = 3
     llm_retry_backoff_seconds: float = 1.0
 

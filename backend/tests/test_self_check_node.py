@@ -61,6 +61,7 @@ def test_grounded_recommendation_via_diagnostics_token_passes() -> None:
 
     assert result["needs_more_evidence"] is False
     assert "grounded" in result["trace"][0].reasoning
+    assert result["recommendations"][0].is_grounded is True
 
 
 # --- ungrounded recommendations trigger retry (once) -----------------------
@@ -77,6 +78,7 @@ def test_ungrounded_recommendation_requests_retry_when_under_cap() -> None:
 
     assert result["needs_more_evidence"] is True
     assert result["retry_count"] == 1
+    assert result["recommendations"][0].is_grounded is False
 
 
 def test_ungrounded_recommendation_stops_retrying_once_cap_reached() -> None:
@@ -149,3 +151,50 @@ def test_zero_recommendations_with_hypotheses_is_weak() -> None:
     state: AgentState = {"hypotheses": [_hypothesis()], "recommendations": [], "retry_count": 0}
     result = self_check_node(state)
     assert result["needs_more_evidence"] is True
+
+
+# --- is_grounded population (structural, not just trace prose) -------------
+
+
+def test_mixed_recommendations_each_get_their_own_grounding_flag() -> None:
+    """A grounded and an ungrounded recommendation in the same call must
+    each receive their own correct is_grounded value — not an all-or-
+    nothing verdict for the whole list."""
+    grounded = _grounded_recommendation()
+    ungrounded = _ungrounded_recommendation()
+    state: AgentState = {
+        "hypotheses": [_hypothesis()],
+        "recommendations": [grounded, ungrounded],
+        "retrieved_knowledge": [_knowledge_chunk()],
+        "retry_count": MAX_RETRIES,  # avoid the retry path so both survive to compare
+    }
+    result = self_check_node(state)
+
+    returned = {r.title: r.is_grounded for r in result["recommendations"]}
+    assert returned["Add dropout"] is True
+    assert returned["Try a bigger model"] is False
+
+
+def test_original_recommendation_objects_are_not_mutated() -> None:
+    """model_copy() must produce new objects — the Recommendation
+    instances passed in should be left exactly as they were."""
+    original = _grounded_recommendation()
+    assert original.is_grounded is False  # the default, pre-self_check
+
+    state: AgentState = {
+        "hypotheses": [_hypothesis()],
+        "recommendations": [original],
+        "retrieved_knowledge": [_knowledge_chunk()],
+        "retry_count": 0,
+    }
+    self_check_node(state)
+
+    assert original.is_grounded is False  # untouched by self_check_node
+
+
+def test_recommendation_defaults_to_not_grounded_before_self_check_runs() -> None:
+    """Recommendation.is_grounded defaults to False — plan_experiments
+    (which constructs these before self_check ever runs) has no basis
+    to claim grounding itself."""
+    rec = _grounded_recommendation()
+    assert rec.is_grounded is False

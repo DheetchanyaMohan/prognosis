@@ -44,3 +44,24 @@ def test_recommendation_valid_construction() -> None:
     )
     assert rec.estimated_effort == "low"
     assert len(rec.provenance) == 2
+
+
+def test_recommendation_is_grounded_defaults_to_false() -> None:
+    """plan_experiments constructs Recommendations before self_check ever
+    runs — is_grounded must default to False, never True, until
+    self_check_node explicitly sets it."""
+    rec = Recommendation(
+        title="Add dropout", rationale="x", supporting_evidence=["e"],
+        expected_benefit="b", estimated_effort="low", confidence=0.8,
+        provenance=["knowledge:regularization"],
+    )
+    assert rec.is_grounded is False
+
+
+def test_recommendation_is_grounded_can_be_set_explicitly() -> None:
+    rec = Recommendation(
+        title="Add dropout", rationale="x", supporting_evidence=["e"],
+        expected_benefit="b", estimated_effort="low", confidence=0.8,
+        provenance=["knowledge:regularization"], is_grounded=True,
+    )
+    assert rec.is_grounded is True

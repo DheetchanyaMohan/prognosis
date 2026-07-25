@@ -8,7 +8,13 @@ generate_structured_list / generate_structured_object — never on a
 provider SDK or ad hoc JSON parsing.
 """
 
-from app.llm.client import AnthropicChatModel, ChatModel, LLMProviderError, get_chat_model
+from app.llm.client import (
+    AnthropicChatModel,
+    ChatModel,
+    GeminiChatModel,
+    LLMProviderError,
+    get_chat_model,
+)
 from app.llm.models import EffortLevel, Hypothesis, Recommendation
 from app.llm.prompts import (
     EXPERIMENT_PLANNING_SYSTEM_PROMPT,
@@ -24,6 +30,7 @@ from app.llm.structured_output import (
 __all__ = [
     "ChatModel",
     "AnthropicChatModel",
+    "GeminiChatModel",
     "get_chat_model",
     "LLMProviderError",
     "Hypothesis",

@@ -5,7 +5,12 @@ abstraction boundary LangGraph nodes use — so no route touches
 SQLAlchemy or a raw file path except through app.tools.experiment_tool's
 RunArtifactPaths lookup, and even then only to hand the path to the same
 loaders (app.config.loader, app.tools.metrics_analysis) everything else
-in the project already uses.
+in the project already uses. The comparison route is the same pattern:
+it calls app.tools.metrics_tool.compare_runs directly — the identical
+function the LangGraph agent calls internally when a query resolves to
+request_type == "compare_runs" — so a frontend that already knows two
+run IDs never needs to go through the agent (or an LLM) just to get a
+deterministic config/diagnostics diff.
 """
 
 from __future__ import annotations
@@ -19,10 +24,10 @@ from starlette.concurrency import run_in_threadpool
 from app.api.dependencies import DbSession
 from app.api.schemas import RunDetailResponse, RunSummaryResponse
 from app.config.loader import load_run_config
-from app.tools import experiment_tool
+from app.tools import experiment_tool, metrics_tool
 from app.tools.experiment_tool import ExperimentNotFoundError, RunNotFoundError
 from app.tools.metrics_analysis import load_diagnostics
-from app.tools.schemas import ExperimentRecord, RunArtifactPaths
+from app.tools.schemas import ExperimentRecord, RunArtifactPaths, RunComparisonResult
 
 router = APIRouter(tags=["experiments"])
 
@@ -76,3 +81,21 @@ async def get_run_detail(run_id: str, db: DbSession) -> RunDetailResponse:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     return await run_in_threadpool(_load_run_detail, paths)
+
+
+@router.get("/runs/{run_a_id}/compare/{run_b_id}", response_model=RunComparisonResult)
+async def compare_runs(run_a_id: str, run_b_id: str, db: DbSession) -> RunComparisonResult:
+    """Deterministic config-diff + diagnostics comparison of two runs.
+
+    This is a plain GET, not routed through the diagnosis agent: it's a
+    pure, fast, already-deterministic computation
+    (app.tools.metrics_tool.compare_runs, the exact function
+    request_type == "compare_runs" calls internally when the LangGraph
+    agent's router happens to parse two run IDs out of a natural-language
+    query) — no LangGraph invocation, no LLM call, no query parsing
+    required when the two runs are already known by ID.
+    """
+    try:
+        return await run_in_threadpool(metrics_tool.compare_runs, run_a_id, run_b_id, db)
+    except RunNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

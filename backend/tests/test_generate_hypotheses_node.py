@@ -18,10 +18,15 @@ class FakeChatModel:
         self.last_system_prompt: str | None = None
         self.last_user_prompt: str | None = None
 
-    def complete(self, system_prompt: str, user_prompt: str) -> str:
+    def complete(self, system_prompt: str, user_prompt: str, response_schema: object = None) -> str:
         self.last_system_prompt = system_prompt
         self.last_user_prompt = user_prompt
         return self._response
+
+    def complete_structured(
+        self, system_prompt: str, user_prompt: str, response_schema: object = None
+    ) -> object:
+        return json.loads(self.complete(system_prompt, user_prompt, response_schema))
 
     def stream_complete(self, system_prompt: str, user_prompt: str):
         yield self._response
@@ -80,7 +85,7 @@ def test_appends_exactly_one_trace_entry() -> None:
 
 def test_malformed_json_raises_structured_output_error() -> None:
     client = FakeChatModel("not valid json at all")
-    with pytest.raises(StructuredOutputError, match="not valid JSON"):
+    with pytest.raises(StructuredOutputError, match="did not return usable structured output"):
         generate_hypotheses_node({"user_query": "x"}, chat_model=client)
 
 

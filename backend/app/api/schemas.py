@@ -77,3 +77,24 @@ class RunDetailResponse(BaseModel):
     diagnostics: RunDiagnostics | None = Field(
         default=None, description="None if diagnostics.json has not been generated yet"
     )
+
+
+class DiagnoseRequest(BaseModel):
+    """POST /runs/{run_id}/diagnose request body — entirely optional; an
+    empty or absent body runs the default diagnostic query for the run
+    named in the path. This is the only request model this feature adds:
+    the response shape (DiagnosisResponse) is owned by app.services,
+    since scripts/validate_agent.py returns the identical object with no
+    HTTP layer involved at all.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    query: str | None = Field(
+        default=None,
+        description=(
+            "Custom question for the agent, e.g. one naming a second run to "
+            "compare against. If omitted, a default 'why did this run behave "
+            "this way and what should I try next' query is used."
+        ),
+    )

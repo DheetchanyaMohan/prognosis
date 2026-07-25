@@ -8,6 +8,12 @@ already exists, checking supporting_evidence/provenance are non-empty
 and reference something real, and decides whether to request one more
 retrieval pass. It never calls a tool and never talks to an LLM itself.
 
+This is also the sole writer of Recommendation.is_grounded — it computes
+the grounding verdict once per recommendation and writes that exact
+result onto the recommendation itself (via model_copy), so the verdict
+reaches the API as a structured field instead of being discarded into
+trace prose.
+
 The retry cap lives here, not in app.agent.graph's routing function —
 self_check is the one node with both the current retry_count and the
 decision of whether evidence is weak in scope at the same time; see
@@ -91,7 +97,19 @@ def self_check_node(state: AgentState) -> dict[str, Any]:
         return {"needs_more_evidence": False, "retry_count": retry_count, "trace": [trace_entry]}
 
     known_tokens = _known_evidence_tokens(state)
-    ungrounded = [r.title for r in recommendations if not _is_grounded(r, known_tokens)]
+
+    # Grounding is computed exactly once per recommendation here, then
+    # reused for both the retry decision below and the is_grounded field
+    # on the recommendation objects themselves — never recomputed a
+    # second time for the response.
+    grounded_flags = [_is_grounded(r, known_tokens) for r in recommendations]
+    updated_recommendations = [
+        r.model_copy(update={"is_grounded": grounded})
+        for r, grounded in zip(recommendations, grounded_flags, strict=True)
+    ]
+    ungrounded = [
+        r.title for r, grounded in zip(recommendations, grounded_flags, strict=True) if not grounded
+    ]
     evidence_is_weak = bool(ungrounded) or not recommendations
 
     can_retry = retry_count < MAX_RETRIES
@@ -125,5 +143,6 @@ def self_check_node(state: AgentState) -> dict[str, Any]:
     return {
         "needs_more_evidence": needs_more_evidence,
         "retry_count": retry_count + 1 if needs_more_evidence else retry_count,
+        "recommendations": updated_recommendations,
         "trace": [trace_entry],
     }

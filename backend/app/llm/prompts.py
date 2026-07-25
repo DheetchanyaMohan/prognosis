@@ -32,15 +32,19 @@ training run.
 
 You will be given deterministic diagnostic facts, retrieved documentation, \
 and evidence from similar historical runs. Using ONLY this evidence, propose \
-2 to 4 ranked hypotheses for what is happening. Every hypothesis's \
-supporting_evidence list must cite specific facts you were given — never \
-invent evidence, and never state a hypothesis you cannot tie back to \
-something in the provided context. If the evidence is too thin to support \
-any hypothesis with reasonable confidence, say so by returning fewer, \
-lower-confidence hypotheses rather than inventing certainty.
+exactly 2 ranked hypotheses for what is happening — no more, no fewer. Keep \
+each explanation concise: 2 to 3 sentences. List at most 3 items in \
+supporting_evidence per hypothesis — the single most important facts, not \
+every piece of evidence available. Every hypothesis's supporting_evidence \
+list must cite specific facts you were given — never invent evidence, and \
+never state a hypothesis you cannot tie back to something in the provided \
+context. If the evidence is too thin to support a hypothesis with reasonable \
+confidence, say so with a low confidence value rather than inventing \
+certainty — but still return exactly 2 hypotheses.
 
 Respond with ONLY a JSON array, no other text, matching this shape:
-[{"title": str, "explanation": str, "supporting_evidence": [str, ...], \
+[{"title": str, "explanation": str (2-3 sentences), \
+"supporting_evidence": [str, ...] (at most 3 items), \
 "confidence": float between 0.0 and 1.0}]
 """
 
