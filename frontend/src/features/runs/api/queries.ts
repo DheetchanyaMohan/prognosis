@@ -1,14 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
 import { apiGet } from "@/lib/api/client"
 import { endpoints } from "@/lib/api/endpoints"
-import type { RunDetailResponse } from "../types"
+import type { RunDetailResponse, RunComparisonResult } from "../types"
 
 export const runKeys = {
   detail: (runId: string) => ["runs", runId] as const,
+  comparison: (runAId: string, runBId: string) => ["runs", "compare", runAId, runBId] as const,
 }
 
 export function getRun(runId: string): Promise<RunDetailResponse> {
   return apiGet<RunDetailResponse>(endpoints.run(runId))
+}
+
+export function getRunComparison(runAId: string, runBId: string): Promise<RunComparisonResult> {
+  return apiGet<RunComparisonResult>(endpoints.compareRuns(runAId, runBId))
 }
 
 /**
@@ -32,5 +37,34 @@ export function useRunQuery(runId: string) {
       const stillPending = data.summary === null || data.diagnostics === null
       return stillPending ? 7_000 : false
     },
+  })
+}
+
+/**
+ * GET /api/v1/runs/{a}/compare/{b} — fully deterministic and
+ * side-effect-free (FRONTEND_INTEGRATION.md §1: "safe to call
+ * repeatedly / cache client-side"), unlike the diagnose mutation.
+ *
+ * `staleTime: Infinity`, not just "long": run IDs are permanent and
+ * never reused, and `diagnostics` — the only inputs this result is
+ * computed from — are documented as immutable once non-null
+ * (Integration Guide §7). For a given pair of run IDs there is no
+ * future point where refetching could return a different answer, so
+ * treating this as merely "low-churn" (the way `experiments` is,
+ * with a 5-minute window) would be under-trusting the guarantee.
+ *
+ * Trade-off worth knowing: Infinity means this query no longer
+ * refetches on window focus/reconnect the way every other query in
+ * the app does (React Query only re-triggers those on stale queries).
+ * That only matters if the backend's own immutability guarantee is
+ * violated out-of-band (e.g. demo fixture data regenerated without a
+ * page reload) — a narrow demo-prep risk, not a correctness one, and
+ * a full reload resolves it.
+ */
+export function useRunComparisonQuery(runAId: string, runBId: string) {
+  return useQuery({
+    queryKey: runKeys.comparison(runAId, runBId),
+    queryFn: () => getRunComparison(runAId, runBId),
+    staleTime: Infinity,
   })
 }

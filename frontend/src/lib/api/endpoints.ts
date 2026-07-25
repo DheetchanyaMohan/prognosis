@@ -1,13 +1,12 @@
 /**
  * Every backend endpoint the frontend is allowed to call, in one
  * place (Engineering Spec §5). Components must never hardcode a URL
- * — they go through a query function in a feature's `api/queries.ts`,
- * which calls one of these.
+ * — they go through a query/mutation function in a feature's
+ * `api/queries.ts` or `api/mutations.ts`, which calls one of these.
  *
- * This is the complete API surface documented in the Frontend
- * Integration Guide: four read-only GET routes, no others. Do not add
- * an endpoint here that the backend doesn't actually expose yet
- * (compare, agent, metrics, etc. are all Future Enhancement).
+ * This is the complete API surface documented in FRONTEND_INTEGRATION.md
+ * as of the backend freeze: six routes total. Do not add an endpoint
+ * here that the backend doesn't actually expose.
  */
 
 export const endpoints = {
@@ -23,4 +22,17 @@ export const endpoints = {
 
   /** GET /api/v1/runs/{runId} */
   run: (runId: string) => `/api/v1/runs/${encodeURIComponent(runId)}`,
+
+  /**
+   * POST /api/v1/runs/{runId}/diagnose — the only non-idempotent,
+   * non-GET route in the API. Invokes the LangGraph agent.
+   */
+  diagnoseRun: (runId: string) => `/api/v1/runs/${encodeURIComponent(runId)}/diagnose`,
+
+  /**
+   * GET /api/v1/runs/{runAId}/compare/{runBId} — deterministic,
+   * fast, no LLM. Order doesn't imply which run is "better."
+   */
+  compareRuns: (runAId: string, runBId: string) =>
+    `/api/v1/runs/${encodeURIComponent(runAId)}/compare/${encodeURIComponent(runBId)}`,
 } as const
