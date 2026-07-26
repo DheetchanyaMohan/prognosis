@@ -72,10 +72,7 @@ export function RunDetailPage() {
         </h2>
         <ConfigPanel config={run.config} />
       </section>
-      <section aria-labelledby="ai-diagnosis-heading" className="border-t border-border pt-6">
-        <h2 id="ai-diagnosis-heading" className="sr-only">
-          AI Diagnosis
-        </h2>
+      <section aria-label="AI Diagnosis" className="border-t border-border pt-6">
         <DiagnosisResultPanel runId={run.run_id} />
       </section>
     </div>

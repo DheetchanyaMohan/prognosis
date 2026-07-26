@@ -3,6 +3,7 @@ import { useRunComparison } from "@/features/runs/hooks/useRunComparison"
 import { ComparisonDiagnosticsGrid } from "@/features/runs/components/ComparisonDiagnosticsGrid"
 import { ConfigDiffTable } from "@/features/runs/components/ConfigDiffTable"
 import { QueryErrorState, Skeleton } from "@/components/ui"
+import { pageHeadingClass } from "@/lib/utils"
 
 function RunComparisonSkeleton() {
   return (
@@ -47,7 +48,7 @@ export function RunComparisonPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold text-foreground">
+      <h1 className={pageHeadingClass}>
         <span className="font-mono">{comparison.run_a_id}</span>
         <span className="mx-2 text-muted-foreground">vs</span>
         <span className="font-mono">{comparison.run_b_id}</span>

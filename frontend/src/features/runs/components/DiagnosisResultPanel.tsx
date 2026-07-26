@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { AlertTriangle } from "lucide-react"
 import { Card, Button } from "@/components/ui"
 import { ApiError } from "@/lib/api/errors"
+import { toUtcDate } from "@/lib/format-date"
 import { useDiagnoseRunMutation } from "../api/mutations"
 import { DiagnoseButton } from "./DiagnoseButton"
 import { HypothesesPanel } from "./HypothesesPanel"
@@ -43,11 +44,6 @@ function useStagedLoadingMessage(isPending: boolean): string {
   }, [isPending])
 
   return STAGE_MESSAGES[stageIndex]
-}
-
-function formatGeneratedAt(timestamp: string): string {
-  const iso = timestamp.endsWith("Z") ? timestamp : `${timestamp}Z`
-  return new Date(iso).toLocaleString()
 }
 
 /**
@@ -92,7 +88,7 @@ export function DiagnosisResultPanel({ runId }: DiagnosisResultPanelProps) {
 
       {mutation.isPending && (
         <Card
-          className="flex items-center justify-center p-8 text-sm text-muted-foreground"
+          className="flex items-center justify-center p-6 text-sm text-muted-foreground"
           aria-live="polite"
         >
           {stageMessage}
@@ -121,7 +117,7 @@ export function DiagnosisResultPanel({ runId }: DiagnosisResultPanelProps) {
       {mutation.isSuccess && mutation.data && (
         <div className="flex flex-col gap-4">
           <p className="text-xs text-muted-foreground">
-            Generated {formatGeneratedAt(mutation.data.generated_at)}
+            Generated {toUtcDate(mutation.data.generated_at).toLocaleString()}
           </p>
 
           <HypothesesPanel hypotheses={mutation.data.hypotheses} />

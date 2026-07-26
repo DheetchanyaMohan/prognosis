@@ -9,7 +9,12 @@ import { HealthIndicator } from "@/features/health/components/HealthIndicator"
  * by anything today.
  */
 export function TopNav() {
-  const { experimentId, runId } = useParams<{ experimentId?: string; runId?: string }>()
+  const { experimentId, runId, runAId, runBId } = useParams<{
+    experimentId?: string
+    runId?: string
+    runAId?: string
+    runBId?: string
+  }>()
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-border px-4 sm:px-6">
@@ -35,6 +40,15 @@ export function TopNav() {
                 <span className="truncate font-mono text-foreground">{runId}</span>
               </>
             )}
+          </nav>
+        )}
+        {runAId && runBId && (
+          <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-muted-foreground">
+            <ChevronRight className="size-3.5 shrink-0" aria-hidden="true" />
+            <span className="truncate">
+              Comparing <span className="font-mono text-foreground">{runAId}</span> vs{" "}
+              <span className="font-mono text-foreground">{runBId}</span>
+            </span>
           </nav>
         )}
       </div>

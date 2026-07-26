@@ -3,6 +3,7 @@ import { useExperimentQuery } from "@/features/experiments"
 import { RunTable } from "@/features/experiments/components/RunTable"
 import { QueryErrorState, Skeleton } from "@/components/ui"
 import { formatBackendDate } from "@/lib/format-date"
+import { cn, pageHeadingClass } from "@/lib/utils"
 
 function ExperimentDetailSkeleton() {
   return (
@@ -46,9 +47,7 @@ export function ExperimentDetailPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-mono text-xl font-semibold text-foreground">
-          {experiment.experiment_name}
-        </h1>
+        <h1 className={cn("font-mono", pageHeadingClass)}>{experiment.experiment_name}</h1>
         <p className="text-sm text-muted-foreground">
           {experiment.description ?? "No description"}
         </p>

@@ -1,4 +1,5 @@
 import { StatusBadge } from "./StatusBadge"
+import { cn, pageHeadingClass } from "@/lib/utils"
 import type { RunStatusFlag } from "../utils/deriveRunStatus"
 
 interface RunHeaderBandProps {
@@ -15,7 +16,7 @@ interface RunHeaderBandProps {
 export function RunHeaderBand({ runId, statusFlags }: RunHeaderBandProps) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="font-mono text-xl font-semibold text-foreground">{runId}</h1>
+      <h1 className={cn("font-mono", pageHeadingClass)}>{runId}</h1>
       <StatusBadge flags={statusFlags} />
     </div>
   )

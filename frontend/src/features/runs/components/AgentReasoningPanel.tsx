@@ -2,15 +2,11 @@ import { useState } from "react"
 import { ChevronRight } from "lucide-react"
 import { Card } from "@/components/ui"
 import { cn } from "@/lib/utils"
+import { toUtcDate } from "@/lib/format-date"
 import type { TraceEntry } from "../types"
 
 interface AgentReasoningPanelProps {
   trace: TraceEntry[]
-}
-
-function formatTimestamp(timestamp: string): string {
-  const iso = timestamp.endsWith("Z") ? timestamp : `${timestamp}Z`
-  return new Date(iso).toLocaleTimeString()
 }
 
 /**
@@ -50,7 +46,9 @@ export function AgentReasoningPanel({ trace }: AgentReasoningPanelProps) {
             <li key={index} className="text-sm">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-xs font-medium text-foreground">{entry.node}</span>
-                <span className="text-xs text-muted-foreground">{formatTimestamp(entry.timestamp)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {toUtcDate(entry.timestamp).toLocaleTimeString()}
+                </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">{entry.reasoning}</p>
               {entry.tools_called.length > 0 && (

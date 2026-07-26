@@ -39,9 +39,13 @@ export function ExperimentListPage() {
   return (
     <div className="flex flex-col gap-3">
       <h1 className="sr-only">Experiments</h1>
-      {data.map((experiment) => (
-        <ExperimentCard key={experiment.experiment_name} experiment={experiment} />
-      ))}
+      <ul className="flex flex-col gap-3">
+        {data.map((experiment) => (
+          <li key={experiment.experiment_name}>
+            <ExperimentCard experiment={experiment} />
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

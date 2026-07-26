@@ -11,6 +11,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Standard `h1` typography for a page whose title is a backend
+ * identifier (an experiment name, a run ID, or both) — e.g.
+ * `ExperimentDetailPage`, `RunHeaderBand`, `RunComparisonPage`.
+ * Extracted after the same `text-xl font-semibold text-foreground`
+ * sequence was found hand-duplicated across those three. Monospacing
+ * is intentionally NOT baked in here: pages whose `h1` is a single
+ * identifier add `font-mono` themselves, while `RunComparisonPage`'s
+ * `h1` mixes two identifiers with the plain word "vs" and only
+ * monospaces the identifier `<span>`s.
+ */
+export const pageHeadingClass = "text-xl font-semibold text-foreground"
+
+/**
  * Shared focus-visible ring treatment (Accessibility §17: focus must
  * always be visible) for custom interactive elements — Links styled
  * as cards or rows — that don't get this styling for free the way a
