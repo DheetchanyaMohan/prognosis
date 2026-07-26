@@ -4,6 +4,7 @@ import { RunHeaderBand } from "@/features/runs/components/RunHeaderBand"
 import { DiagnosisPanel } from "@/features/runs/components/DiagnosisPanel"
 import { SummaryPanel } from "@/features/runs/components/SummaryPanel"
 import { ConfigPanel } from "@/features/runs/components/ConfigPanel"
+import { DiagnosisResultPanel } from "@/features/runs/components/DiagnosisResultPanel"
 import { QueryErrorState, Skeleton } from "@/components/ui"
 
 function RunDetailSkeleton() {
@@ -26,7 +27,10 @@ function RunDetailSkeleton() {
  * "diagnosis report" (Architecture §7). Visual hierarchy is
  * deliberate and matches §10 exactly: status badge (in
  * RunHeaderBand) → diagnosis cards → summary prose → configuration
- * table, never the other way around.
+ * table, never the other way around. The AI Diagnosis section
+ * (Milestone 3) comes last and is opt-in — it's an additional,
+ * on-demand interpretive layer on top of the always-present
+ * deterministic report above it, not a replacement for any of it.
  */
 export function RunDetailPage() {
   const { runId } = useParams<{ runId: string }>()
@@ -67,6 +71,12 @@ export function RunDetailPage() {
           Configuration
         </h2>
         <ConfigPanel config={run.config} />
+      </section>
+      <section aria-labelledby="ai-diagnosis-heading" className="border-t border-border pt-6">
+        <h2 id="ai-diagnosis-heading" className="sr-only">
+          AI Diagnosis
+        </h2>
+        <DiagnosisResultPanel runId={run.run_id} />
       </section>
     </div>
   )
