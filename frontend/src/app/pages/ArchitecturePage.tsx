@@ -1,4 +1,5 @@
 import { SystemArchitectureFlow } from "@/features/marketing/components/SystemArchitectureFlow"
+import { LangGraphWorkflowSection } from "@/features/marketing/components/LangGraphWorkflowSection"
 import { KeyConceptsSection } from "@/features/marketing/components/KeyConceptsSection"
 import { TechStackSection } from "@/features/marketing/components/TechStackSection"
 import { RoadmapSection } from "@/features/marketing/components/RoadmapSection"
@@ -11,10 +12,11 @@ import { pageHeadingClass } from "@/lib/utils"
  * since "Architecture" isn't a backend identifier) — it reads as
  * another page within the product, not a second marketing hero.
  *
- * `SystemArchitectureFlow` and `KeyConceptsSection` lead the page
- * (this page's stated purpose is demonstrating real AI-engineering
- * knowledge), with the pre-existing Tech Stack/Roadmap material
- * following as supporting reference detail.
+ * Section order: System Architecture (the system) → LangGraph Agent
+ * Workflow (the agent) → Key Concepts → Technology Stack → Roadmap —
+ * the two diagrams complement each other rather than duplicating:
+ * one explains the request/response pipeline end to end, the other
+ * zooms into what happens inside the "LangGraph" box specifically.
  */
 export function ArchitecturePage() {
   return (
@@ -26,6 +28,7 @@ export function ArchitecturePage() {
         </p>
       </div>
       <SystemArchitectureFlow />
+      <LangGraphWorkflowSection />
       <KeyConceptsSection />
       <TechStackSection />
       <RoadmapSection />

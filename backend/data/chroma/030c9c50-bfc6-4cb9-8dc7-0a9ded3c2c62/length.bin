@@ -1,1 +1,8 @@
-invalid type: string "Data Augmentation as Regularization\n\nAugmentation effectively regularizes by artificially growing the training\nset's diversity, which makes it harder for the model to memorize specific\nexamples. See the data augmentation document for details on specific\ntechniques.", expected i64ooleanoving given a much larger epoch budget or a\nlarger learning rate.", expected f64ÿÿÿÿÿÿ
+What It Looks Like
+
+Underfitting happens when a model fails to learn the training data well
+enough in the first place. Both training and validation loss stay high,
+and training accuracy itself is disappointing â€” not just validation
+accuracy. Unlike overfitting, there's no meaningful gap between train and
+validation performance, because the model hasn't captured enough signal
+to do well on either
