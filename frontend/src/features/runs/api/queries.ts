@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueries } from "@tanstack/react-query"
 import { apiGet } from "@/lib/api/client"
 import { endpoints } from "@/lib/api/endpoints"
 import type { RunDetailResponse, RunComparisonResult } from "../types"
@@ -17,27 +17,53 @@ export function getRunComparison(runAId: string, runBId: string): Promise<RunCom
 }
 
 /**
- * GET /api/v1/runs/{runId} — the richest endpoint. `config` is
- * effectively immutable once written; `summary`/`diagnostics` can
- * flip from `null` to populated while a run is training, then never
- * change again (Integration Guide §7, Engineering Spec §6).
- *
- * Polling: enabled only while either `summary` or `diagnostics` is
- * still `null`, and disabled the instant both are populated — a
- * `null` result must never be treated as a cached final answer.
+ * The query options for a single run — extracted so `useRunQuery`
+ * (one run) and `useRunsQueries` (many runs, for `useExperimentSummary`)
+ * share one definition of "how do we fetch/poll a run" instead of
+ * duplicating the polling logic. `config` is effectively immutable
+ * once written; `summary`/`diagnostics` can flip from `null` to
+ * populated while a run is training, then never change again
+ * (Integration Guide §7, Engineering Spec §6).
  */
-export function useRunQuery(runId: string) {
-  return useQuery({
+function runQueryOptions(runId: string) {
+  return {
     queryKey: runKeys.detail(runId),
     queryFn: () => getRun(runId),
     staleTime: 0,
-    refetchInterval: (query) => {
+    refetchInterval: (query: { state: { data?: RunDetailResponse } }) => {
       const data = query.state.data
       if (!data) return false
       const stillPending = data.summary === null || data.diagnostics === null
       return stillPending ? 7_000 : false
     },
-  })
+  }
+}
+
+/**
+ * GET /api/v1/runs/{runId} — the richest endpoint. Polling: enabled
+ * only while either `summary` or `diagnostics` is still `null`, and
+ * disabled the instant both are populated — a `null` result must
+ * never be treated as a cached final answer.
+ */
+export function useRunQuery(runId: string) {
+  return useQuery(runQueryOptions(runId))
+}
+
+/**
+ * Fetches multiple runs at once via `useQueries` — the correct React
+ * Query API for a dynamic-length array of queries (calling
+ * `useRunQuery` in a loop would violate the Rules of Hooks, since the
+ * number of runs isn't known at compile time). Shares the exact same
+ * query key as `useRunQuery`, so this does NOT introduce a second,
+ * separate fetch pattern: if `RunRow` has already fetched a given
+ * run_id, this reads the same cache entry rather than re-fetching it,
+ * and vice versa. Built for `useExperimentSummary` (aggregate stats
+ * across every run in an experiment) — still the same N+1-by-design
+ * pattern documented in Integration Guide §7/§9, just consumed by two
+ * different call sites instead of one.
+ */
+export function useRunsQueries(runIds: string[]) {
+  return useQueries({ queries: runIds.map(runQueryOptions) })
 }
 
 /**

@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui"
+import { ConfidenceBar } from "./ConfidenceBar"
 import { formatPercent } from "../utils/format-run-stats"
 import type { Hypothesis } from "../types"
 
@@ -29,29 +30,34 @@ export function HypothesesPanel({ hypotheses }: HypothesesPanelProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <ul className="flex flex-col gap-3">
       {hypotheses.map((hypothesis, index) => (
-        <Card key={index} className="p-4">
-          <CardHeader className="p-0">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-sm font-medium text-foreground">{hypothesis.title}</CardTitle>
-              <span className="font-mono text-xs tabular-nums text-muted-foreground">
-                {formatPercent(hypothesis.confidence)}% confidence
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0 pt-2">
-            <p className="text-sm text-foreground">{hypothesis.explanation}</p>
-            {hypothesis.supporting_evidence.length > 0 && (
-              <ul className="mt-2 list-inside list-disc text-xs text-muted-foreground">
-                {hypothesis.supporting_evidence.map((evidence, i) => (
-                  <li key={i}>{evidence}</li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+        <li key={index}>
+          <Card className="p-4">
+            <CardHeader className="p-0">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <CardTitle className="text-sm font-medium text-foreground">{hypothesis.title}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <ConfidenceBar confidence={hypothesis.confidence} />
+                  <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                    {formatPercent(hypothesis.confidence)}% confidence
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 pt-2">
+              <p className="text-sm text-foreground">{hypothesis.explanation}</p>
+              {hypothesis.supporting_evidence.length > 0 && (
+                <ul className="mt-2 list-inside list-disc text-xs text-muted-foreground">
+                  {hypothesis.supporting_evidence.map((evidence, i) => (
+                    <li key={i}>{evidence}</li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

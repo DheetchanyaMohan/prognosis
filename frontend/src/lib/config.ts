@@ -16,4 +16,12 @@ function requireEnv(name: string, fallback?: string): string {
 export const config = {
   apiBaseUrl: requireEnv("VITE_API_BASE_URL", "http://localhost:8000"),
   appName: requireEnv("VITE_APP_NAME", "Prognosis"),
+  /**
+   * No real repository URL is known to this codebase, so this is
+   * NOT given a fabricated fallback the way `apiBaseUrl`/`appName`
+   * are — it's `undefined` until you set it, and `TopNav` hides the
+   * GitHub link entirely rather than pointing it at a guessed or
+   * placeholder URL.
+   */
+  githubUrl: import.meta.env.VITE_GITHUB_URL as string | undefined,
 } as const

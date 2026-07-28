@@ -11,6 +11,14 @@
  * deliberately if another feature ever needs one"): `RunRow` renders
  * the exact same status presentation as `RunHeaderBand`, so it reuses
  * this component rather than re-implementing flag→tone/icon mapping.
+ *
+ * `GroundedBadge`/`ConfidenceBar` are exported for the same reason:
+ * the Home page's static "Diagnosis Preview" (marketing feature)
+ * needs to render an illustrative example that visually matches a
+ * real diagnosis exactly, so a first-time visitor recognizes the
+ * interface later — reusing the actual components is what makes that
+ * true, rather than a marketing team hand-rolling a lookalike.
+ *
  * Other `runs/components` (GapCard, ConfigPanel, etc.) stay
  * un-exported since only `app/pages/RunDetailPage` consumes them
  * directly today.
@@ -23,3 +31,5 @@ export * from "./hooks/useRunComparison"
 export * from "./utils/deriveRunStatus"
 export * from "./utils/format-run-stats"
 export * from "./components/StatusBadge"
+export * from "./components/GroundedBadge"
+export * from "./components/ConfidenceBar"

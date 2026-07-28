@@ -4,6 +4,8 @@ import type { RetrievedChunk } from "../types"
 interface EvidenceListProps {
   title: string
   chunks: RetrievedChunk[]
+  /** Singular/plural-aware noun for the count line, e.g. "chunks", "runs". */
+  countNoun: string
 }
 
 const sourceTypeLabel: Record<RetrievedChunk["metadata"]["source_type"], string> = {
@@ -16,15 +18,23 @@ const sourceTypeLabel: Record<RetrievedChunk["metadata"]["source_type"], string>
  * with an identical shape — one reusable component instead of two
  * near-duplicate renderers, used twice with different titles.
  *
+ * The count line (Milestone 5 §5 "Retrieval transparency") is the
+ * real array length — not a fabricated or rounded figure — so a
+ * recruiter can see at a glance that retrieval genuinely happened and
+ * how much evidence came back.
+ *
  * An empty array is a valid, informative result, not an error: even
  * "no evidence retrieved" supports trustworthiness by being honest
  * about what did (or didn't) ground the response.
  */
-export function EvidenceList({ title, chunks }: EvidenceListProps) {
+export function EvidenceList({ title, chunks, countNoun }: EvidenceListProps) {
   return (
     <Card className="p-4">
       <CardHeader className="p-0">
         <CardTitle>{title}</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {chunks.length} {countNoun} retrieved
+        </p>
       </CardHeader>
       <CardContent className="p-0 pt-3">
         {chunks.length === 0 ? (
