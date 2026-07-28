@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { EmptyState } from "@/components/ui"
 import { RunRow } from "./RunRow"
-import { CompareBar } from "./compareBar"
+import { CompareBar } from "./CompareBar"
 import { useRunSelection } from "../hooks/useRunSelection"
 
 interface RunTableProps {
