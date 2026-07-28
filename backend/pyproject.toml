@@ -2,7 +2,6 @@
 name = "ml-experiment-agent"
 version = "0.1.0"
 description = "AI experiment diagnosis and decision support system for ML engineers"
-readme = "../README.md"
 requires-python = ">=3.12"
 
 dependencies = [
