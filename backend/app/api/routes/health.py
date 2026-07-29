@@ -43,13 +43,32 @@ def _check_llm_provider() -> HealthComponentStatus:
     the provider. See app.llm.client.get_chat_model for the real client."""
     settings = get_settings()
 
-    if settings.llm_provider != "anthropic":
+    provider = settings.llm_provider
+
+    if provider == "anthropic":
+        if not settings.anthropic_api_key:
+            return HealthComponentStatus(
+                status="not_configured",
+                detail="ANTHROPIC_API_KEY is not set",
+            )
+
+    elif provider == "gemini":
+        if not settings.gemini_api_key:
+            return HealthComponentStatus(
+                status="not_configured",
+                detail="GEMINI_API_KEY is not set",
+            )
+
+    else:
         return HealthComponentStatus(
-            status="error", detail=f"Unknown LLM provider configured: {settings.llm_provider!r}"
+            status="error",
+            detail=f"Unknown LLM provider configured: {provider!r}",
         )
-    if not settings.anthropic_api_key:
-        return HealthComponentStatus(status="not_configured", detail="ANTHROPIC_API_KEY is not set")
-    return HealthComponentStatus(status="ok", detail=f"provider={settings.llm_provider}")
+
+    return HealthComponentStatus(
+        status="ok",
+        detail=f"provider={provider}",
+    )
 
 
 @router.get("/health", response_model=HealthResponse, tags=["system"])
