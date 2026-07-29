@@ -9,9 +9,8 @@ WORKDIR /app
 # Install dependencies first so this layer is cached unless pyproject.toml changes.
 COPY pyproject.toml ./
 COPY app ./app
+COPY data ./data
 RUN pip install --upgrade pip && pip install .
-
-RUN mkdir -p /app/data/db
 
 EXPOSE 8000
 
