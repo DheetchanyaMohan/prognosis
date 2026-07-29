@@ -5,6 +5,7 @@ __pycache__/
 .eggs/
 build/
 dist/
+*_check.py
 
 # Virtual environments
 .venv/
@@ -15,9 +16,9 @@ env/
 .env
 
 # Databases
-*.db
+# *.db
 *.sqlite3
-data/db/*.db
+# data/db/*.db
 
 # Testing / tooling
 .pytest_cache/
