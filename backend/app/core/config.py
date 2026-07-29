@@ -35,8 +35,10 @@ class Settings(BaseSettings):
 
     # API
     api_v1_prefix: str = "/api/v1"
-    cors_allow_origins: list[str] = ["http://localhost:5173"]
-
+    cors_allow_origins: list[str] = [
+        "http://localhost:5173",
+        "https://prognosis-eagup51c3-dheetchanya-s-projects.vercel.app",
+    ]
     # Database
     database_url: str = f"sqlite:///{BACKEND_ROOT / 'data' / 'db' / 'experiments.db'}"
 
