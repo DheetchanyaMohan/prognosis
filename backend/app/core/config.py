@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     # API
     api_v1_prefix: str = "/api/v1"
-    cors_allow_origins = [
+    cors_allow_origins: list[str] = [
         "http://localhost:5173",
         "https://prognosis-henna.vercel.app",
     ]
