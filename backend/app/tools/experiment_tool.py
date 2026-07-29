@@ -1,3 +1,5 @@
+from pathlib import Path
+from app.tools.paths import get_run_artifact_paths as build_artifact_paths
 """Experiment and run metadata access.
 
 This is the only interface LangGraph nodes use to reach experiment
@@ -110,11 +112,4 @@ def get_run_artifact_paths(run_id: str, db: Session | None = None) -> RunArtifac
     """
     with session_scope(db) as session:
         run = get_run_or_raise(session, run_id)
-        return RunArtifactPaths(
-            run_id=run_id,
-            config_path=run.config_path,
-            metrics_path=run.metrics_path,
-            log_path=run.log_path,
-            summary_path=run.summary_path,
-            diagnostics_path=run.diagnostics_path,
-        )
+        return build_artifact_paths(run)

@@ -9,7 +9,7 @@ so a run's diagnosis always reflects its current Metric rows.
 """
 
 from __future__ import annotations
-
+from app.tools.paths import get_run_artifact_paths
 from pathlib import Path
 
 from sqlalchemy.orm import Session
@@ -37,7 +37,10 @@ __all__ = [
 
 
 def _config_summary_for(run: Run) -> RunConfigSummary:
-    config = load_run_config(Path(run.config_path))
+    paths = get_run_artifact_paths(run)
+
+    config = load_run_config(Path(paths.config_path))
+
     return RunConfigSummary(
         train_size=config.dataset.train_size,
         val_size=config.dataset.val_size,
@@ -50,7 +53,6 @@ def _config_summary_for(run: Run) -> RunConfigSummary:
         weight_decay=config.training.weight_decay,
         epochs=config.training.epochs,
     )
-
 
 def _diagnostics_for(run: Run) -> RunDiagnostics:
     epoch_history = epoch_history_from_metric_rows(run.metrics)
