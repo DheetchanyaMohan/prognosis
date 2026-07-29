@@ -7,6 +7,12 @@ The `pathology` field on each spec is internal to this script only. It is
 never written into config.yaml — only into data/eval/ground_truth/, which
 nothing in the training/agent/RAG path ever reads.
 
+Phase 1: run directories are derived via app.tools.run_paths (which
+itself derives from settings.data_root) instead of an independent
+BACKEND_ROOT-relative computation — this is what keeps scaffolding
+consistent with wherever DATA_ROOT actually points in a given
+deployment, rather than always writing under the code checkout path.
+
 Run as:
     python scripts/generate_experiment_plan.py
 """
@@ -15,17 +21,15 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from pathlib import Path
 
 import yaml
 
 from app.config.loader import load_and_validate
 from app.config.schema import DatasetConfig, ModelConfig, RunConfig, TrainingConfig
+from app.core.config import get_settings
+from app.tools import run_paths
 
-BACKEND_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_NAME = "exp_001_cifar10_subset_study"
-RUNS_ROOT = BACKEND_ROOT / "data" / "experiments" / EXPERIMENT_NAME / "runs"
-GROUND_TRUTH_ROOT = BACKEND_ROOT / "data" / "eval" / "ground_truth"
 
 
 @dataclass
@@ -117,9 +121,8 @@ def _build_run_config(spec: _RunSpec) -> RunConfig:
 
 def generate_configs() -> None:
     """Write config.yaml for every spec and scaffold each run's folder tree."""
-    RUNS_ROOT.mkdir(parents=True, exist_ok=True)
     for spec in RUN_SPECS:
-        run_dir = RUNS_ROOT / spec.run_id
+        run_dir = run_paths.run_directory(EXPERIMENT_NAME, spec.run_id)
         run_dir.mkdir(parents=True, exist_ok=True)
         (run_dir / "artifacts").mkdir(exist_ok=True)
 
@@ -130,9 +133,10 @@ def generate_configs() -> None:
 
 def generate_ground_truth() -> None:
     """Write the eval-only ground-truth label for every spec, in its own directory tree."""
-    GROUND_TRUTH_ROOT.mkdir(parents=True, exist_ok=True)
+    ground_truth_root = get_settings().data_root / "eval" / "ground_truth"
+    ground_truth_root.mkdir(parents=True, exist_ok=True)
     for spec in RUN_SPECS:
-        with (GROUND_TRUTH_ROOT / f"{spec.run_id}.json").open("w", encoding="utf-8") as f:
+        with (ground_truth_root / f"{spec.run_id}.json").open("w", encoding="utf-8") as f:
             json.dump({"run_id": spec.run_id, "induced_pathology": spec.pathology}, f, indent=2)
             f.write("\n")
 
@@ -140,9 +144,11 @@ def generate_ground_truth() -> None:
 def main() -> None:
     generate_configs()
     generate_ground_truth()
-    configs = load_and_validate(RUNS_ROOT)  # fails loudly on any bad config, before any compute
-    print(f"Generated and validated {len(configs)} run configs under {RUNS_ROOT}")
-    print(f"Generated {len(RUN_SPECS)} ground-truth files under {GROUND_TRUTH_ROOT}")
+    runs_root = run_paths.run_directory(EXPERIMENT_NAME, "").parent
+    configs = load_and_validate(runs_root)  # fails loudly on any bad config, before any compute
+    print(f"Generated and validated {len(configs)} run configs under {runs_root}")
+    ground_truth_root = get_settings().data_root / "eval" / "ground_truth"
+    print(f"Generated {len(RUN_SPECS)} ground-truth files under {ground_truth_root}")
 
 
 if __name__ == "__main__":

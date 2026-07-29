@@ -35,12 +35,19 @@ class Settings(BaseSettings):
 
     # API
     api_v1_prefix: str = "/api/v1"
-    cors_allow_origins: list[str] = [
-        "http://localhost:5173",
-        "https://prognosis-henna.vercel.app",
-    ]
+    cors_allow_origins: list[str] = ["http://localhost:5173"]
+
     # Database
     database_url: str = f"sqlite:///{BACKEND_ROOT / 'data' / 'db' / 'experiments.db'}"
+
+    # Single source of truth for where run artifacts live on disk. Never
+    # persisted anywhere — every consumer (app.tools.run_paths) derives
+    # paths from this at call time, in whatever process is currently
+    # running, instead of a path baked in by whichever machine originally
+    # created the run. Overridable via DATA_ROOT for deployments where
+    # data lives on a mounted volume unrelated to the code checkout path
+    # (e.g. Railway).
+    data_root: Path = BACKEND_ROOT / "data"
 
     # External services (used by later phases, not the current scaffold)
     anthropic_api_key: str | None = None

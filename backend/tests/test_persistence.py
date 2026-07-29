@@ -17,8 +17,7 @@ def test_persist_run_creates_run_and_metrics(db_session: Session) -> None:
         db=db_session,
         experiment=experiment,
         run_id="run_test",
-        config_path="x", metrics_path="x", log_path="x", summary_path="x",
-        diagnostics_path="x", status="complete",
+        status="complete",
         epoch_history=history,
     )
 
@@ -41,8 +40,7 @@ def test_deleting_experiment_cascades_through_run_to_metrics(db_session: Session
     db_session.commit()
     persist_run(
         db=db_session, experiment=experiment, run_id="run_cascade",
-        config_path="x", metrics_path="x", log_path="x", summary_path="x",
-        diagnostics_path="x", status="complete",
+        status="complete",
         epoch_history=[EpochMetrics(1, 0.5, 0.5, 0.5, 0.5, 0.001, 1.0)],
     )
 

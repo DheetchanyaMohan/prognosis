@@ -14,14 +14,15 @@ from pathlib import Path
 from app.config.loader import load_and_validate, load_run_config
 from app.data_generation.run_experiment import execute_run
 from app.db.session import SessionLocal
+from app.tools import run_paths
 
-BACKEND_ROOT = Path(__file__).resolve().parents[1]
 EXPERIMENT_NAME = "exp_001_cifar10_subset_study"
-RUNS_ROOT = BACKEND_ROOT / "data" / "experiments" / EXPERIMENT_NAME / "runs"
 
 
-def _run_dir_for(run_id: str) -> Path:
-    return RUNS_ROOT / run_id
+def _config_path_for(run_id: str) -> Path:
+    # config.yaml scaffolding still lives under the same convention;
+    # only the *persisted* paths are gone, not the on-disk layout itself.
+    return run_paths.run_directory(EXPERIMENT_NAME, run_id) / "config.yaml"
 
 
 def main() -> None:
@@ -34,20 +35,20 @@ def main() -> None:
         parser.error("provide a run_id or pass --all")
 
     if args.all:
-        configs = load_and_validate(RUNS_ROOT)  # fails loudly before any run starts
+        runs_root = run_paths.run_directory(EXPERIMENT_NAME, "").parent
+        configs = load_and_validate(runs_root)
     else:
-        config_path = _run_dir_for(args.run_id) / "config.yaml"
+        config_path = _config_path_for(args.run_id)
         if not config_path.exists():
             sys.exit(f"No config found at {config_path}")
         configs = [load_run_config(config_path)]
 
     for config in configs:
-        run_dir = _run_dir_for(config.run_id)
         db = SessionLocal()
         try:
             print(f"Running {config.run_id}...")
-            execute_run(config, run_dir, db)
-            print(f"  done -> {run_dir}")
+            execute_run(config, db)
+            print(f"  done -> {run_paths.run_directory(config.experiment_name, config.run_id)}")
         finally:
             db.close()
 

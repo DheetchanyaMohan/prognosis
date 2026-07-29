@@ -1,21 +1,37 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
 
 import httpx
+import pytest
 import yaml
 from sqlalchemy.orm import Session
 
 from app.config.schema import DatasetConfig, ModelConfig, RunConfig, TrainingConfig
+from app.core.config import get_settings
 from app.data_generation.metrics_writer import EpochMetrics
 from app.data_generation.persistence import get_or_create_experiment, persist_run
+from app.tools import run_paths
 
 
-def _write_config(path: Path, run_id: str, dropout: float = 0.3) -> None:
+@pytest.fixture(autouse=True)
+def _data_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """The run-detail and comparison routes resolve config.yaml's
+    location via run_paths, which depends on settings.data_root — point
+    it at tmp_path for the duration of each test, matching where
+    _seed_run below actually writes files."""
+    get_settings.cache_clear()
+    monkeypatch.setenv("DATA_ROOT", str(tmp_path))
+    yield
+    get_settings.cache_clear()
+
+
+def _write_config(path: Path, run_id: str, experiment_name: str, dropout: float = 0.3) -> None:
     config = RunConfig(
         run_id=run_id,
-        experiment_name="exp_test",
+        experiment_name=experiment_name,
         seed=0,
         description="test run",
         dataset=DatasetConfig(train_size=1000, val_size=500, augmentation=True),
@@ -68,7 +84,6 @@ def _write_diagnostics(path: Path, run_id: str) -> None:
 
 def _seed_run(
     db: Session,
-    tmp_path: Path,
     run_id: str,
     experiment_name: str = "exp_test",
     with_summary: bool = True,
@@ -78,24 +93,17 @@ def _seed_run(
     experiment = get_or_create_experiment(db, name=experiment_name, description="a test experiment")
     db.commit()
 
-    run_dir = tmp_path / run_id
+    run_dir = run_paths.run_directory(experiment_name, run_id)
     run_dir.mkdir(parents=True, exist_ok=True)
-    config_path = run_dir / "config.yaml"
-    _write_config(config_path, run_id, dropout=dropout)
+    _write_config(run_dir / "config.yaml", run_id, experiment_name, dropout=dropout)
 
-    summary_path = run_dir / "summary.json"
     if with_summary:
-        _write_summary(summary_path, run_id)
-
-    diagnostics_path = run_dir / "diagnostics.json"
+        _write_summary(run_dir / "summary.json", run_id)
     if with_diagnostics:
-        _write_diagnostics(diagnostics_path, run_id)
+        _write_diagnostics(run_dir / "diagnostics.json", run_id)
 
     persist_run(
-        db=db, experiment=experiment, run_id=run_id,
-        config_path=str(config_path), metrics_path="x", log_path="x",
-        summary_path=str(summary_path), diagnostics_path=str(diagnostics_path),
-        status="complete",
+        db=db, experiment=experiment, run_id=run_id, status="complete",
         epoch_history=[
             EpochMetrics(1, 0.6, 0.7, 0.65, 0.6, 0.001, 1.0),
             EpochMetrics(2, 0.5, 0.6, 0.7, 0.65, 0.001, 1.0),
@@ -113,9 +121,9 @@ async def test_list_experiments_empty(api_client: httpx.AsyncClient) -> None:
 
 
 async def test_list_experiments_returns_seeded_experiment(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_001", experiment_name="exp_alpha")
+    _seed_run(db_session, "run_001", experiment_name="exp_alpha")
 
     response = await api_client.get("/api/v1/experiments")
 
@@ -130,9 +138,9 @@ async def test_list_experiments_returns_seeded_experiment(
 
 
 async def test_get_experiment_returns_details(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_001", experiment_name="exp_alpha")
+    _seed_run(db_session, "run_001", experiment_name="exp_alpha")
 
     response = await api_client.get("/api/v1/experiments/exp_alpha")
 
@@ -151,10 +159,8 @@ async def test_get_experiment_404_when_missing(api_client: httpx.AsyncClient) ->
 # --- GET /api/v1/runs/{run_id} -----------------------------------------
 
 
-async def test_get_run_detail_full(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
-) -> None:
-    _seed_run(db_session, tmp_path, "run_001")
+async def test_get_run_detail_full(api_client: httpx.AsyncClient, db_session: Session) -> None:
+    _seed_run(db_session, "run_001")
 
     response = await api_client.get("/api/v1/runs/run_001")
 
@@ -173,9 +179,9 @@ async def test_get_run_detail_404_when_missing(api_client: httpx.AsyncClient) ->
 
 
 async def test_get_run_detail_null_summary_and_diagnostics_when_not_yet_generated(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_002", with_summary=False, with_diagnostics=False)
+    _seed_run(db_session, "run_002", with_summary=False, with_diagnostics=False)
 
     response = await api_client.get("/api/v1/runs/run_002")
 
@@ -187,9 +193,9 @@ async def test_get_run_detail_null_summary_and_diagnostics_when_not_yet_generate
 
 
 async def test_get_run_detail_partial_when_only_summary_exists(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_003", with_summary=True, with_diagnostics=False)
+    _seed_run(db_session, "run_003", with_summary=True, with_diagnostics=False)
 
     response = await api_client.get("/api/v1/runs/run_003")
 
@@ -203,10 +209,10 @@ async def test_get_run_detail_partial_when_only_summary_exists(
 
 
 async def test_compare_runs_returns_config_differences(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_101", dropout=0.0)
-    _seed_run(db_session, tmp_path, "run_102", dropout=0.5)
+    _seed_run(db_session, "run_101", dropout=0.0)
+    _seed_run(db_session, "run_102", dropout=0.5)
 
     response = await api_client.get("/api/v1/runs/run_101/compare/run_102")
 
@@ -219,10 +225,10 @@ async def test_compare_runs_returns_config_differences(
 
 
 async def test_compare_runs_includes_diagnostics_for_both_runs(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_101")
-    _seed_run(db_session, tmp_path, "run_102")
+    _seed_run(db_session, "run_101")
+    _seed_run(db_session, "run_102")
 
     response = await api_client.get("/api/v1/runs/run_101/compare/run_102")
 
@@ -233,9 +239,9 @@ async def test_compare_runs_includes_diagnostics_for_both_runs(
 
 
 async def test_compare_runs_404_when_first_run_missing(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_102")
+    _seed_run(db_session, "run_102")
 
     response = await api_client.get("/api/v1/runs/does_not_exist/compare/run_102")
 
@@ -244,9 +250,9 @@ async def test_compare_runs_404_when_first_run_missing(
 
 
 async def test_compare_runs_404_when_second_run_missing(
-    api_client: httpx.AsyncClient, db_session: Session, tmp_path: Path
+    api_client: httpx.AsyncClient, db_session: Session
 ) -> None:
-    _seed_run(db_session, tmp_path, "run_101")
+    _seed_run(db_session, "run_101")
 
     response = await api_client.get("/api/v1/runs/run_101/compare/does_not_exist")
 

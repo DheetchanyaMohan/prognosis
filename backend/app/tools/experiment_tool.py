@@ -1,5 +1,3 @@
-from pathlib import Path
-
 """Experiment and run metadata access.
 
 This is the only interface LangGraph nodes use to reach experiment
@@ -13,6 +11,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.models import Experiment, Run
+from app.tools import run_paths
 from app.tools._db import ExperimentNotFoundError, RunNotFoundError, get_run_or_raise, session_scope
 from app.tools.schemas import ExperimentRecord, RunArtifactPaths, RunRecord, RunSearchFilters
 
@@ -106,26 +105,12 @@ def list_experiments(db: Session | None = None) -> list[ExperimentRecord]:
 
 
 def get_run_artifact_paths(run_id: str, db: Session | None = None) -> RunArtifactPaths:
-    """Looks up where a run's artifact files live on disk.
+    """Looks up where a run's artifact files live on disk — now computed
+    via app.tools.run_paths from (experiment_name, run_name), not read
+    off stored path columns.
 
     Raises RunNotFoundError if no such run exists.
     """
     with session_scope(db) as session:
         run = get_run_or_raise(session, run_id)
-
-        run_dir = (
-            Path("data")
-            / "experiments"
-            / run.experiment.name
-            / "runs"
-            / run.run_name
-        )
-
-        return RunArtifactPaths(
-            run_id=run.run_name,
-            config_path=str(run_dir / "config.yaml"),
-            metrics_path=str(run_dir / "metrics.csv"),
-            log_path=str(run_dir / "training.log"),
-            summary_path=str(run_dir / "summary.json"),
-            diagnostics_path=str(run_dir / "diagnostics.json"),
-        )
+        return run_paths.build_run_artifact_paths(run.experiment.name, run.run_name)

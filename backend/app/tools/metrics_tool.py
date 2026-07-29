@@ -6,6 +6,10 @@ app.tools.metrics_analysis rather than recomputing anything, and pull
 epoch history live from the database via
 epoch_history_from_metric_rows — diagnostics.json is never read here,
 so a run's diagnosis always reflects its current Metric rows.
+
+Phase 1: config.yaml's location is now derived via app.tools.run_paths
+from (experiment_name, run_name) instead of read off run.config_path —
+the stored column still exists but is no longer consulted here.
 """
 
 from __future__ import annotations
@@ -16,6 +20,7 @@ from sqlalchemy.orm import Session
 
 from app.config.loader import load_run_config
 from app.models import Run
+from app.tools import run_paths
 from app.tools._db import ExperimentNotFoundError, RunNotFoundError, get_run_or_raise, session_scope
 from app.tools.metrics_analysis import epoch_history_from_metric_rows
 from app.tools.metrics_analysis import summarize_run as _analyze_epoch_history
@@ -37,7 +42,8 @@ __all__ = [
 
 
 def _config_summary_for(run: Run) -> RunConfigSummary:
-    config = load_run_config(Path(run.config_path))
+    paths = run_paths.build_run_artifact_paths(run.experiment.name, run.run_name)
+    config = load_run_config(Path(paths.config_path))
     return RunConfigSummary(
         train_size=config.dataset.train_size,
         val_size=config.dataset.val_size,

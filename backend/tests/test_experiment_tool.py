@@ -18,9 +18,7 @@ def _seed_run(db: Session, experiment_name: str, run_id: str, status: str = "com
     experiment = get_or_create_experiment(db, name=experiment_name)
     db.commit()
     persist_run(
-        db=db, experiment=experiment, run_id=run_id,
-        config_path="x", metrics_path="x", log_path="x", summary_path="x",
-        diagnostics_path="x", status=status,
+        db=db, experiment=experiment, run_id=run_id, status=status,
         epoch_history=[EpochMetrics(1, 0.5, 0.6, 0.7, 0.6, 0.001, 1.0)],
     )
 

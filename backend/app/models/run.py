@@ -3,6 +3,14 @@
 Deliberately has no ground-truth pathology column: this table is queryable
 by agent tools, so ground truth never enters it. Labels live only in
 data/eval/ground_truth/, outside this schema entirely.
+
+Phase 2: the five artifact-path columns (config_path, metrics_path,
+log_path, summary_path, diagnostics_path) have been removed. Artifact
+paths are computed at call time via app.tools.run_paths from
+(experiment.name, run_name, settings.data_root) — nothing has read
+these columns since Phase 1, and nothing writes them anymore either.
+See app/db/migrations/versions/0002_drop_run_artifact_path_columns.py
+for the corresponding schema migration.
 """
 
 from __future__ import annotations
@@ -31,12 +39,6 @@ class Run(IDMixin, TimestampMixin, Base):
         index=True,
     )
     run_name: Mapped[str] = mapped_column(String(255), nullable=False)
-
-    config_path: Mapped[str] = mapped_column(String(512), nullable=False)
-    metrics_path: Mapped[str] = mapped_column(String(512), nullable=False)
-    log_path: Mapped[str] = mapped_column(String(512), nullable=False)
-    summary_path: Mapped[str] = mapped_column(String(512), nullable=False)
-    diagnostics_path: Mapped[str] = mapped_column(String(512), nullable=False)
 
     status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="complete")
 

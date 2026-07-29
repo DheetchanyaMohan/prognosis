@@ -2,6 +2,12 @@
 existing SQLAlchemy models (app.models.Experiment/Run/Metric). No new
 persistence logic is defined here beyond wiring — the models already
 carry the schema, cascades, and constraints.
+
+Phase 2: the five artifact-path columns no longer exist on Run at all
+(see app/models/run.py), so the empty-string placeholders Phase 1 needed
+to satisfy their NOT NULL constraint are gone too — there is nothing
+left to work around. Artifact paths are derived on demand via
+app.tools.run_paths.
 """
 
 from __future__ import annotations
@@ -28,24 +34,10 @@ def persist_run(
     db: Session,
     experiment: Experiment,
     run_id: str,
-    config_path: str,
-    metrics_path: str,
-    log_path: str,
-    summary_path: str,
-    diagnostics_path: str,
     status: str,
     epoch_history: list[EpochMetrics],
 ) -> Run:
-    run = Run(
-        experiment=experiment,
-        run_name=run_id,
-        config_path=config_path,
-        metrics_path=metrics_path,
-        log_path=log_path,
-        summary_path=summary_path,
-        diagnostics_path=diagnostics_path,
-        status=status,
-    )
+    run = Run(experiment=experiment, run_name=run_id, status=status)
     for m in epoch_history:
         run.metrics.append(
             Metric(
