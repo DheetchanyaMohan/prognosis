@@ -57,6 +57,7 @@ def _check_chroma() -> HealthComponentStatus:
         return HealthComponentStatus(status="error", detail=str(exc))
     return HealthComponentStatus(status="ok", detail=detail)
 
+
 def _check_llm_provider() -> HealthComponentStatus:
     """Configuration check only — never constructs a ChatModel or calls
     the provider. See app.llm.client.get_chat_model for the real client."""
