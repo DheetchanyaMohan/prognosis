@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     cors_allow_origins: list[str] = [
         "http://localhost:5173",
         "https://prognosis-henna.vercel.app",
+        "https://prognosis-ai.vercel.app",
     ]
 
     # Database
