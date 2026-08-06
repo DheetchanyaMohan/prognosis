@@ -33,6 +33,12 @@ class HealthResponse(BaseModel):
     """GET /health response. `status` is 'degraded' if any component that
     the app cannot function without (database, chroma) reports 'error';
     an unconfigured LLM provider is a valid, non-degraded dev-time state.
+    An empty knowledge_docs/run_summaries collection does NOT mark the
+    overall status degraded — retrieval gracefully returning zero
+    evidence is documented, deliberate agent behavior, not an outage —
+    but document_count: 0 is immediately visible in the response, which
+    is the actual point of this field: making an empty knowledge base
+    impossible to miss after a deployment.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -40,6 +46,8 @@ class HealthResponse(BaseModel):
     status: Literal["ok", "degraded"]
     database: HealthComponentStatus
     chroma: HealthComponentStatus
+    knowledge_docs: CollectionStatus
+    run_summaries: CollectionStatus
     llm_provider: HealthComponentStatus
 
 
@@ -98,3 +106,18 @@ class DiagnoseRequest(BaseModel):
             "this way and what should I try next' query is used."
         ),
     )
+
+class CollectionStatus(BaseModel):
+    """Document count for a single Chroma collection — reported
+    separately from general Chroma connectivity (HealthResponse.chroma)
+    so an empty collection is immediately visible, rather than looking
+    identical to a healthy, populated one."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["ok", "error"]
+    document_count: int | None = Field(
+        default=None,
+        description="Chunk count for this collection; null only if it couldn't be read at all",
+    )
+    detail: str | None = None

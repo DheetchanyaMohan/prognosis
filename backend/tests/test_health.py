@@ -28,7 +28,7 @@ async def test_health_reports_overall_ok_when_database_and_chroma_healthy(
 async def test_health_response_shape(api_client: httpx.AsyncClient) -> None:
     response = await api_client.get("/health")
     body = response.json()
-    assert set(body.keys()) == {"status", "database", "chroma", "llm_provider"}
+    assert set(body.keys()) == {"status", "database", "chroma", "llm_provider", "knowledge_docs", "run_summaries",}
     for component in ("database", "chroma", "llm_provider"):
         assert "status" in body[component]
         assert "detail" in body[component]
