@@ -11,6 +11,7 @@ here rather than opening its own connection.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, cast
@@ -21,6 +22,7 @@ from chromadb.api.models.Collection import Collection
 
 from app.rag.embed import Embedder, EmbeddingModel
 from app.rag.schemas import ChunkMetadata, RetrievedChunk
+
 
 CHROMA_PERSIST_DIR = Path(__file__).resolve().parents[2] / "data" / "chroma"
 
@@ -38,7 +40,10 @@ def get_chroma_client(persist_dir: Path | None = None) -> ClientAPI:
 
     print(f"[DEBUG] Chroma persist dir: {persist_dir}")
     print(f"[DEBUG] Exists: {persist_dir.exists()}")
-    print(f"[DEBUG] Files: {list(persist_dir.glob('*'))}")
+    for root, dirs, files in os.walk(persist_dir):
+        print(root)
+        for f in files:
+            print("  FILE:", f)
 
     return chromadb.PersistentClient(path=str(persist_dir))
 
