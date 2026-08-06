@@ -35,8 +35,12 @@ _COLLECTION_METADATA = {"hnsw:space": "cosine"}
 def get_chroma_client(persist_dir: Path | None = None) -> ClientAPI:
     persist_dir = persist_dir if persist_dir is not None else CHROMA_PERSIST_DIR
     persist_dir.mkdir(parents=True, exist_ok=True)
-    return chromadb.PersistentClient(path=str(persist_dir))
 
+    print(f"[DEBUG] Chroma persist dir: {persist_dir}")
+    print(f"[DEBUG] Exists: {persist_dir.exists()}")
+    print(f"[DEBUG] Files: {list(persist_dir.glob('*'))}")
+
+    return chromadb.PersistentClient(path=str(persist_dir))
 
 def get_or_create_collection(client: ClientAPI, name: str) -> Collection:
     return client.get_or_create_collection(name=name, metadata=_COLLECTION_METADATA)
