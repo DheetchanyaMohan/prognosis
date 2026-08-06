@@ -48,11 +48,30 @@ def _check_chroma(client: ClientAPI) -> HealthComponentStatus:
 
 
 def _check_collection(client: ClientAPI, collection_name: str) -> CollectionStatus:
+    print("\n===== HEALTH DEBUG =====")
+
+    try:
+        print("Collections:", [c.name for c in client.list_collections()])
+    except Exception as exc:
+        print("list_collections failed:", exc)
+
+    try:
+        collection = client.get_collection(collection_name)
+        print(f"{collection_name} count:", collection.count())
+    except Exception as exc:
+        print("get_collection failed:", exc)
+
+    print("=========================\n")
+
     try:
         count = client.get_collection(collection_name).count()
-    except Exception:  # noqa: BLE001 - collection not existing yet is not a real error
+    except Exception:
         return CollectionStatus(status="ok", document_count=0)
-    return CollectionStatus(status="ok", document_count=count)
+
+    return CollectionStatus(
+        status="ok",
+        document_count=count,
+    )
 
 
 def _check_llm_provider() -> HealthComponentStatus:
