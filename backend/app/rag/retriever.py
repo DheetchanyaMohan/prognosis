@@ -33,16 +33,9 @@ RUN_SUMMARY_COLLECTION_NAME = "run_summaries"
 #: are reported as 1 - cosine_distance (1.0 = identical, 0.0 = orthogonal).
 _COLLECTION_METADATA = {"hnsw:space": "cosine"}
 
-
 def get_chroma_client(persist_dir: Path | None = None) -> ClientAPI:
     persist_dir = persist_dir if persist_dir is not None else CHROMA_PERSIST_DIR
     persist_dir.mkdir(parents=True, exist_ok=True)
-
-    print(f"\n===== CHROMA DIR: {persist_dir} =====")
-    for path in sorted(persist_dir.rglob("*")):
-        print(path)
-    print("=====================================\n")
-
     return chromadb.PersistentClient(path=str(persist_dir))
 
 def get_or_create_collection(client: ClientAPI, name: str) -> Collection:

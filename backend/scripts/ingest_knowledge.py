@@ -36,28 +36,37 @@ def main() -> None:
 
     client = get_chroma_client()
 
-    # Idempotent by reconstruction, not by relying on upsert alone: upsert
-    # can't remove chunks belonging to a deleted or shrunk source file, so
-    # any existing collection (e.g. from a previous build) is dropped and
-    # rebuilt fresh from the current source documents every time — never
-    # an accumulation of old and new chunks.
     try:
         client.delete_collection(KNOWLEDGE_COLLECTION_NAME)
         print(f"Cleared existing '{KNOWLEDGE_COLLECTION_NAME}' collection")
-    except Exception:  # noqa: BLE001 - nothing to clear is the common case, not an error
+    except Exception:
         print(f"No existing '{KNOWLEDGE_COLLECTION_NAME}' collection to clear")
 
     try:
-        chunk_count = ingest_knowledge_documents(DEFAULT_KNOWLEDGE_DIR, client=client)
-        print(
-            "Collection count after ingest:",
-            client.get_collection(KNOWLEDGE_COLLECTION_NAME).count(),
+        chunk_count = ingest_knowledge_documents(
+            DEFAULT_KNOWLEDGE_DIR,
+            client=client,
         )
-    except Exception as exc:  # noqa: BLE001 - must exit non-zero, not raise, to fail the build
+    except Exception as exc:
         print(f"Knowledge base ingestion failed: {exc}", file=sys.stderr)
         sys.exit(1)
 
+    # ---------- DEBUG ----------
+    print("\n===== POST-INGEST DEBUG =====")
+    collections = client.list_collections()
+    print("Collections:", [c.name for c in collections])
+
+    try:
+        collection = client.get_collection(KNOWLEDGE_COLLECTION_NAME)
+        print("Collection count:", collection.count())
+    except Exception as exc:
+        print("Could not open collection:", exc)
+
+    print("=============================\n")
+    # ---------------------------
+
     doc_count = len(sorted(DEFAULT_KNOWLEDGE_DIR.glob("*.md")))
+
     if chunk_count == 0:
         print(
             "Knowledge base ingestion produced zero chunks "
@@ -66,14 +75,10 @@ def main() -> None:
         )
         sys.exit(1)
 
-    print(f"Knowledge base ready: {doc_count} document(s), {chunk_count} chunk(s)")
-
-    print("=== Persist directory contents ===")
-    for root, dirs, files in os.walk(BACKEND_ROOT / "data" / "chroma"):
-        print(root)
-        for f in files:
-            print(" ", f)
-
+    print(
+        f"Knowledge base ready: {doc_count} document(s), "
+        f"{chunk_count} chunk(s)"
+    )
 
 if __name__ == "__main__":
     main()
