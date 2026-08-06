@@ -38,12 +38,10 @@ def get_chroma_client(persist_dir: Path | None = None) -> ClientAPI:
     persist_dir = persist_dir if persist_dir is not None else CHROMA_PERSIST_DIR
     persist_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[DEBUG] Chroma persist dir: {persist_dir}")
-    print(f"[DEBUG] Exists: {persist_dir.exists()}")
-    for root, dirs, files in os.walk(persist_dir):
-        print(root)
-        for f in files:
-            print("  FILE:", f)
+    print(f"\n===== CHROMA DIR: {persist_dir} =====")
+    for path in sorted(persist_dir.rglob("*")):
+        print(path)
+    print("=====================================\n")
 
     return chromadb.PersistentClient(path=str(persist_dir))
 
