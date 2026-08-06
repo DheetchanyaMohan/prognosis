@@ -49,6 +49,10 @@ def main() -> None:
 
     try:
         chunk_count = ingest_knowledge_documents(DEFAULT_KNOWLEDGE_DIR, client=client)
+        print(
+            "Collection count after ingest:",
+            client.get_collection(KNOWLEDGE_COLLECTION_NAME).count(),
+        )
     except Exception as exc:  # noqa: BLE001 - must exit non-zero, not raise, to fail the build
         print(f"Knowledge base ingestion failed: {exc}", file=sys.stderr)
         sys.exit(1)
