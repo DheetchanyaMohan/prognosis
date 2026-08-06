@@ -16,6 +16,7 @@ Usage (normally invoked from the Dockerfile, not by hand):
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -62,6 +63,12 @@ def main() -> None:
         sys.exit(1)
 
     print(f"Knowledge base ready: {doc_count} document(s), {chunk_count} chunk(s)")
+
+    print("=== Persist directory contents ===")
+    for root, dirs, files in os.walk(BACKEND_ROOT / "data" / "chroma"):
+        print(root)
+        for f in files:
+            print(" ", f)
 
 
 if __name__ == "__main__":
