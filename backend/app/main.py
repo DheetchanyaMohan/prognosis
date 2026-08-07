@@ -19,21 +19,23 @@ settings = get_settings()
 from pathlib import Path
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(app: FastAPI):
     configure_logging()
 
-    print("\n========== STARTUP DEBUG ==========")
-    print("cwd:", Path.cwd())
-    print("/app exists:", Path("/app").exists())
-    print("/app/data exists:", Path("/app/data").exists())
-    print("/app/data/chroma exists:", Path("/app/data/chroma").exists())
+    chroma = Path("/app/data/chroma")
 
-    if Path("/app/data/chroma").exists():
-        print("\nContents:")
-        for p in sorted(Path("/app/data/chroma").rglob("*")):
-            print(" ", p)
+    print("\n===== STARTUP =====")
 
-    print("===================================\n")
+    print("sqlite exists:", (chroma / "chroma.sqlite3").exists())
+
+    if (chroma / "chroma.sqlite3").exists():
+        print("sqlite size:", (chroma / "chroma.sqlite3").stat().st_size)
+
+    print("contents:")
+    for p in sorted(chroma.iterdir()):
+        print(" ", p.name)
+
+    print("===================\n")
 
     yield
 
