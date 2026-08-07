@@ -75,6 +75,9 @@ def main() -> None:
         )
         sys.exit(1)
 
+    persist = BACKEND_ROOT / "data" / "chroma"
+    print("sqlite exists after ingest:", (persist / "chroma.sqlite3").exists())
+
     print(
         f"Knowledge base ready: {doc_count} document(s), "
         f"{chunk_count} chunk(s)"
