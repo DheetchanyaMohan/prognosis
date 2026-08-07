@@ -16,15 +16,31 @@ from app.core.logging import configure_logging
 
 settings = get_settings()
 
+from pathlib import Path
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     configure_logging()
+
+    print("\n========== STARTUP DEBUG ==========")
+    print("cwd:", Path.cwd())
+    print("/app exists:", Path("/app").exists())
+    print("/app/data exists:", Path("/app/data").exists())
+    print("/app/data/chroma exists:", Path("/app/data/chroma").exists())
+
+    if Path("/app/data/chroma").exists():
+        print("\nContents:")
+        for p in sorted(Path("/app/data/chroma").rglob("*")):
+            print(" ", p)
+
+    print("===================================\n")
+
     yield
 
 
 def create_app() -> FastAPI:
     """Application factory. Keeps app construction testable and explicit."""
+
     app = FastAPI(
         title=settings.app_name,
         debug=settings.debug,
