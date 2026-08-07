@@ -111,6 +111,7 @@ def _print_dry_run(runs_root: Path, reset: bool) -> None:
 def main(argv: list[str] | None = None) -> None:
     args = _parse_args(argv)
     configure_logging()
+
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -128,11 +129,27 @@ def main(argv: list[str] | None = None) -> None:
 
     start = time.monotonic()
 
-    if args.reset:
-        _reset_collection()
-
     ready, incomplete = _dry_run_runs(args.runs_root)
-    run_chunk_count = ingest_run_summaries(args.runs_root)
+
+    client = get_chroma_client()
+
+    try:
+        if args.reset:
+            try:
+                client.delete_collection(RUN_SUMMARY_COLLECTION_NAME)
+                logger.info(f"Cleared existing collection {RUN_SUMMARY_COLLECTION_NAME!r}")
+            except Exception as exc:  # noqa: BLE001 - absence is expected
+                logger.info(
+                    f"No existing collection {RUN_SUMMARY_COLLECTION_NAME!r} to clear ({exc})"
+                )
+
+        run_chunk_count = ingest_run_summaries(
+            args.runs_root,
+            client=client,
+        )
+
+    finally:
+        client.close()
 
     elapsed = time.monotonic() - start
 
